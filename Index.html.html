@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T&E Summary Dashboard — 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f8f9fc;--surface:#fff;--surface2:#f1f3f8;--navy:#0a1628;--navy2:#112240;--navy3:#1a3a6b;--blue:#1e5fcc;--blue2:#2d7cf6;--blue3:#a8c8ff;--indigo:#4f46e5;--indigo2:#6366f1;--emerald:#059669;--emerald2:#10b981;--emerald3:#d1fae5;--rose:#dc2626;--rose2:#ef4444;--rose3:#fee2e2;--amber:#b45309;--amber2:#f59e0b;--amber3:#fef3c7;--purple:#7c3aed;--border:#e2e8f0;--text:#0f172a;--text2:#334155;--text3:#64748b;--shadow:0 1px 3px rgba(0,0,0,0.08);--shadow2:0 4px 16px rgba(0,0,0,0.10);--radius:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;}
+.header{background:var(--navy);position:sticky;top:0;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:14px 36px;gap:16px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-badge{width:38px;height:38px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,var(--blue),var(--indigo));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;}
+.brand-info h1{font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.2px;}
+.brand-info p{font-size:11px;color:rgba(255,255,255,0.4);margin-top:1px;}
+.header-chips{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.hc{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;}
+.hc-blue{background:rgba(45,124,246,0.2);color:var(--blue3);border:1px solid rgba(45,124,246,0.3);}
+.hc-rose{background:rgba(239,68,68,0.2);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);}
+.hc-dim{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.1);}
+.filter-bar{padding:8px 36px 0;display:flex;align-items:center;gap:0;flex-wrap:wrap;row-gap:6px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);}
+.fg{display:flex;align-items:center;border-right:1px solid rgba(255,255,255,0.08);padding-right:14px;margin-right:14px;}
+.fg:last-of-type{border-right:none;}
+.fg-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.3);margin-right:10px;font-family:'JetBrains Mono',monospace;}
+.seg-grp{display:flex;gap:1px;background:rgba(255,255,255,0.07);border-radius:6px;padding:2px;border:1px solid rgba(255,255,255,0.1);}
+.seg{padding:5px 14px;border-radius:5px;font-size:11.5px;font-weight:500;cursor:pointer;color:rgba(255,255,255,0.5);background:transparent;border:none;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
+.seg:hover{color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.08);}
+.seg.on{background:linear-gradient(135deg,var(--blue),var(--indigo2));color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(30,95,204,0.4);}
+.seg:disabled{opacity:0.3;cursor:not-allowed;}
+.month-grp{display:none;}.month-grp.show{display:flex;}
+.quarter-grp{display:none;}.quarter-grp.show{display:flex;}
+.bc-wrap{margin-left:auto;display:flex;align-items:center;gap:8px;padding-bottom:8px;}
+.bc-tag{padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;background:rgba(45,124,246,0.2);color:var(--blue3);border:1px solid rgba(45,124,246,0.25);}
+.bc-sep{color:rgba(255,255,255,0.2);}.bc-rng{font-size:11px;color:rgba(255,255,255,0.3);font-family:'JetBrains Mono',monospace;}
+.nav-tabs{background:var(--navy2);padding:0 36px;display:flex;overflow-x:auto;border-top:1px solid rgba(255,255,255,0.05);}
+.nav-tabs a{padding:10px 18px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.45);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s;}
+.nav-tabs a:hover{color:rgba(255,255,255,0.8);}.nav-tabs a.on{color:var(--blue3);border-bottom-color:var(--blue2);}
+.main{padding:28px 36px;max-width:1600px;margin:0 auto;}
+.sec{margin-bottom:28px;scroll-margin-top:115px;}
+.sec-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--blue);margin-bottom:4px;font-family:'JetBrains Mono',monospace;}
+.sec-title{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-0.3px;}
+.sec-sub{font-size:11.5px;color:var(--text3);margin-top:3px;}
+.divider{height:2px;background:linear-gradient(90deg,var(--navy) 0%,var(--blue2) 30%,transparent 75%);border-radius:1px;margin:14px 0 18px;}
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);}
+.card-body{padding:20px;}.card-hdr{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ch-title{font-size:13px;font-weight:600;color:var(--text);}.ch-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.sc-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:14px;margin-bottom:16px;}
+.hero{background:linear-gradient(140deg,var(--navy) 0%,var(--navy3) 100%);border-radius:var(--radius);padding:24px 26px;color:#fff;border:1px solid rgba(255,255,255,0.06);position:relative;overflow:hidden;box-shadow:var(--shadow2);}
+.hero::before{content:'26';position:absolute;right:-8px;top:-10px;font-size:130px;font-weight:800;color:rgba(45,124,246,0.06);font-family:'JetBrains Mono',monospace;line-height:1;pointer-events:none;}
+.h-ey{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.4);margin-bottom:10px;font-family:'JetBrains Mono',monospace;}
+.h-amt{font-size:42px;font-weight:800;color:#fff;line-height:1;letter-spacing:-1px;font-family:'JetBrains Mono',monospace;}
+.h-bud{font-size:12.5px;color:rgba(255,255,255,0.45);margin-top:6px;}
+.h-var{display:inline-flex;align-items:center;padding:5px 14px;border-radius:20px;font-size:12.5px;font-weight:700;margin-top:12px;font-family:'JetBrains Mono',monospace;}
+.hv-pos{background:rgba(16,185,129,0.2);color:#6ee7b7;}.hv-neg{background:rgba(239,68,68,0.2);color:#fca5a5;}
+.h-stats{display:flex;gap:24px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);}
+.hst-val{font-size:28px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;}
+.hst-lbl{font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.7px;margin-top:2px;}
+.kpi{background:var(--surface);border-radius:var(--radius);padding:18px;border:1px solid var(--border);box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi-blue::before{background:linear-gradient(90deg,var(--blue),var(--indigo));}
+.kpi-rose::before{background:linear-gradient(90deg,var(--rose),var(--rose2));}
+.kpi-emerald::before{background:linear-gradient(90deg,var(--emerald),var(--emerald2));}
+.kpi-amber::before{background:linear-gradient(90deg,var(--amber),var(--amber2));}
+.kpi-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.kpi-icon{font-size:18px;}.kpi-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);}
+.kpi-val{font-size:24px;font-weight:800;color:var(--text);line-height:1;font-family:'JetBrains Mono',monospace;letter-spacing:-0.5px;}
+.kpi-bud{font-size:11px;color:var(--text3);margin-top:4px;}
+.kpi-vr{margin-top:8px;font-size:12px;font-weight:700;}
+.kv-pos{color:var(--emerald);}.kv-neg{color:var(--rose2);}
+.pbar{height:4px;background:var(--surface2);border-radius:2px;margin-top:8px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:2px;transition:width 0.6s ease;}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text3);background:var(--surface2);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;}
+.tbl th:hover{color:var(--text);}.tbl td{padding:8px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}.tbl tr:hover td{background:#f8faff;}
+.tbl tfoot td{font-weight:700;background:var(--surface2);border-top:2px solid var(--border);}
+.mono{font-family:'JetBrains Mono',monospace;font-size:11.5px;}
+.pos{color:var(--emerald);font-weight:700;background:var(--emerald3);}.neg{color:var(--rose2);font-weight:700;background:var(--rose3);}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;}
+.b-green{background:var(--emerald3);color:var(--emerald);}.b-red{background:var(--rose3);color:var(--rose);}
+.b-amber{background:var(--amber3);color:var(--amber);}.b-purple{background:#ede9fe;color:var(--purple);}
+.flag-intl{padding:1px 7px;border-radius:4px;font-size:10px;background:#ede9fe;color:var(--purple);font-weight:700;}
+.srow{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.sbox{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:100px;box-shadow:var(--shadow);}
+.sb-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.7px;font-weight:600;}
+.sb-val{font-size:21px;font-weight:800;color:var(--text);margin-top:4px;font-family:'JetBrains Mono',monospace;letter-spacing:-0.5px;}
+.footer{background:var(--navy);color:rgba(255,255,255,0.3);padding:16px 36px;text-align:center;font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:40px;border-top:2px solid var(--blue);}
+@media(max-width:1200px){.sc-grid{grid-template-columns:1fr 1fr;}.hero{grid-column:span 2;}.g2{grid-template-columns:1fr;}.main{padding:20px;}.filter-bar,.nav-tabs,.header-top{padding-left:20px;padding-right:20px;}}
+
+.istrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:12px;margin-top:16px;}
+.ipill{background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;font-size:12px;color:var(--text2);line-height:1.6;}
+.ipill .dot{color:var(--blue2);margin-right:4px;font-weight:700;}
+
+/* ── CEO Corporate Adjustment Alert Card ── */
+.ceo-alert{margin-top:16px;background:linear-gradient(135deg,#1a1f2e 0%,#1e3a6b 100%);border:1px solid rgba(45,124,246,0.4);border-radius:10px;padding:0;overflow:hidden;}
+.ceo-alert-hdr{padding:12px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.ceo-alert-icon{width:36px;height:36px;border-radius:8px;background:rgba(220,38,38,0.25);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.ceo-alert-title{font-size:13px;font-weight:700;color:#fff;}
+.ceo-alert-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;}
+.ceo-alert-body{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.ceo-alert-text{font-size:12px;color:rgba(255,255,255,0.75);line-height:1.65;}
+.ceo-alert-text strong{color:#fff;}
+.ceo-alert-text .highlight{color:#fca5a5;font-weight:700;}
+.ceo-cc-table{width:100%;border-collapse:collapse;font-size:11.5px;}
+.ceo-cc-table th{text-align:left;padding:5px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:rgba(255,255,255,0.35);border-bottom:1px solid rgba(255,255,255,0.08);}
+.ceo-cc-table td{padding:7px 10px;color:rgba(255,255,255,0.75);border-bottom:1px solid rgba(255,255,255,0.05);}
+.ceo-cc-table td.amt{text-align:right;font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace;color:#fca5a5;font-weight:600;}
+.ceo-cc-table tr:last-child td{border-bottom:none;color:#fff;font-weight:700;}
+.ceo-cc-table tr:last-child td.amt{color:#fca5a5;}
+
+
+/* ══ EXPANDABLE LEADER ROWS ══ */
+.exp-btn {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:20px; height:20px; border-radius:4px; border:1.5px solid #3b82f6;
+  background:#fff; color:#3b82f6; font-size:11px; font-weight:700;
+  cursor:pointer; transition:all .15s; flex-shrink:0; padding:0; line-height:1;
+}
+.exp-btn:hover { background:#3b82f6; color:#fff; }
+.exp-btn.active { background:#3b82f6; color:#fff; transform:rotate(45deg); }
+.ldr-name-cell { display:flex; align-items:center; gap:8px; }
+.sub-count-badge {
+  font-size:10px; font-weight:600; color:#3b82f6;
+  background:#eff6ff; border:1px solid #bfdbfe;
+  border-radius:4px; padding:1px 6px; white-space:nowrap;
+}
+.sub-detail-row { display:none; }
+.sub-detail-row.open { display:table-row; }
+.sub-detail-row td { padding:0; background:#f8faff; border-bottom:2px solid #dbeafe; }
+.sub-inner { width:100%; border-collapse:collapse; }
+.sub-inner thead tr { background:#eff6ff; }
+.sub-inner thead th {
+  padding:7px 12px; font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.5px; color:#1e40af;
+  border-bottom:1px solid #bfdbfe; text-align:left;
+}
+.sub-inner thead th:not(:first-child) { text-align:right; }
+.sub-inner tbody tr { border-bottom:1px solid #e0eaff; }
+.sub-inner tbody tr:last-child { border-bottom:none; }
+.sub-inner tbody tr:hover { background:#eef4ff; }
+.sub-inner tbody td { padding:7px 12px; font-size:11.5px; color:#374151; }
+.sub-inner tbody td:first-child { padding-left:20px; font-weight:600; color:#1e3a6b; }
+.sub-inner tbody td:not(:first-child) { text-align:right; font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace; font-size:11px; }
+.sub-inner tfoot tr { background:#dbeafe; }
+.sub-inner tfoot td { padding:7px 12px; font-size:11px; font-weight:700; color:#1e40af; }
+.sub-inner tfoot td:not(:first-child) { text-align:right; font-family:'JetBrains Mono','Cascadia Code','Consolas',monospace; }
+
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-top">
+    <div class="brand">
+      <div class="brand-badge">26</div>
+      <div class="brand-info">
+        <h1>T&amp;E Summary Dashboard — 2026</h1>
+        <p>Jan – Jul 2026 &nbsp;·&nbsp; 23 Ops Leaders + Others &nbsp;·&nbsp; 10 Spend Categories &nbsp;·&nbsp; Confidential</p>
+      </div>
+    </div>
+    <div class="header-chips">
+      <span class="hc hc-blue">2026 — Jan · Feb · Mar · Apr · May · Jun · Jul</span>
+      <span class="hc hc-rose" id="hc-var">YTD Variance (Jan–Jul)</span>
+      <span class="hc hc-dim">Data as of: Jul 31, 2026</span>
+    </div>
+  </div>
+  <div class="filter-bar">
+    <div class="fg"><span class="fg-lbl">View</span>
+      <div class="seg-grp">
+        <button class="seg" id="s-mtd" onclick="setTier('mtd')">MTD</button>
+        <button class="seg on" id="s-ytd" onclick="setTier('ytd')">YTD</button>
+        <button class="seg" id="s-qtd" onclick="setTier('qtd')">QTD</button>
+      </div>
+    </div>
+    <div class="fg month-grp" id="month-grp"><span class="fg-lbl">Month</span>
+      <div class="seg-grp">
+        <button class="seg" id="s-jan" onclick="setMonth('jan')">Jan</button>
+        <button class="seg" id="s-feb" onclick="setMonth('feb')">Feb</button>
+        <button class="seg" id="s-mar" onclick="setMonth('mar')">Mar</button>
+        <button class="seg" id="s-apr" onclick="setMonth('apr')">Apr</button>
+        <button class="seg" id="s-may" onclick="setMonth('may')">May</button>
+        <button class="seg" id="s-jun" onclick="setMonth('jun')">Jun</button>
+        <button class="seg on" id="s-jul" onclick="setMonth('jul')">Jul</button>
+      </div>
+    </div>
+    <div class="fg quarter-grp" id="quarter-grp"><span class="fg-lbl">Quarter</span>
+      <div class="seg-grp">
+        <button class="seg on" id="s-q1" onclick="setQuarter('q1')">Q1 (Jan–Mar)</button>
+        <button class="seg" id="s-q2" onclick="setQuarter('q2')">Q2 (Apr–Jun)</button>
+      </div>
+    </div>
+    <div class="bc-wrap">
+      <span id="bc-v" class="bc-tag">YTD</span><span class="bc-sep">/</span>
+      <span id="bc-p" class="bc-tag">YTD 2026</span><span class="bc-sep">·</span>
+      <span id="bc-r" class="bc-rng">Jan 1 – Jul 31, 2026</span>
+    </div>
+  </div>
+  <nav class="nav-tabs">
+    <a href="#s-summary" class="on">Summary</a>
+    <a href="#s-category">By Category</a>
+    <a href="#s-leaders">By Leader</a>
+    <a href="#s-compliance">Compliance</a>
+    <a href="#s-travel">Travel Split</a>
+    <a href="#s-airfare">Airfare</a>
+    <a href="#s-hotel">Hotel</a>
+    <a href="#s-savings">Meridian Travel Savings</a>
+  </nav>
+</div>
+
+<div class="main">
+
+<div class="sec" id="s-summary">
+  <div class="sec-tag">01 / Executive Summary</div>
+  <div class="sec-title">Budget vs. Actual Performance</div>
+  <div class="sec-sub" id="sc-sub">YTD 2026 — January through June · All Ops Leaders</div>
+  <div class="divider"></div>
+  <div id="scorecard-content"></div>
+</div>
+
+<div class="sec" id="s-category">
+  <div class="sec-tag">02 / Spend by Category</div>
+  <div class="sec-title">Actual vs. Budget — All Categories</div>
+  <div class="sec-sub">Variance = Budget − Actual · Positive = Under Budget · Negative in parentheses = Over Budget</div>
+  <div class="divider"></div>
+  <div class="g2">
+    <div class="card" style="display:flex;flex-direction:column;"><div class="card-body" style="flex:1;"><div style="position:relative;height:100%;min-height:260px;width:100%;"><canvas id="catChart"></canvas></div></div></div>
+    <div class="card">
+      <div class="card-hdr"><div class="ch-title">Category Detail — <span id="cat-lbl">YTD 2026</span></div></div>
+      <table class="tbl">
+        <thead><tr><th>Category</th><th>Budget</th><th>Actual</th><th>Budget − Actual</th></tr></thead>
+        <tbody id="cat-tbody"></tbody><tfoot id="cat-tfoot"></tfoot>
+      </table>
+    </div>
+  </div>
+  </div>
+
+<div class="sec" id="s-leaders">
+  <div class="sec-tag">03 / Ops Leaders</div>
+  <div class="sec-title">Budget Performance by Leader</div>
+  <div class="sec-sub">Corporate Leader &amp; BTL-Corp excluded · Variance = Budget − Actual</div>
+  <div class="divider"></div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-hdr"><div class="ch-title">Actual vs. Budget — Per Ops Leader</div><div class="ch-sub">Blue = within budget · Red = over budget</div></div>
+    <div class="card-body"><div style="position:relative;height:220px;width:100%;"><canvas id="ldrChart"></canvas></div></div>
+  </div>
+  <div class="g2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-hdr"><div><div class="ch-title">Highest Budget Remaining</div><div class="ch-sub">Top 5 under-budget leaders</div></div><span class="badge b-green">Under Budget</span></div>
+      <table class="tbl"><thead><tr><th>Ops Leader</th><th>Actual</th><th>Budget</th><th>Budget − Actual</th><th>Var %</th></tr></thead><tbody id="tbl-under"></tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><div><div class="ch-title">Highest Over Budget</div><div class="ch-sub">Top 5 over-budget leaders</div></div><span class="badge b-red">Over Budget</span></div>
+      <table class="tbl"><thead><tr><th>Ops Leader</th><th>Actual</th><th>Budget</th><th>Budget − Actual</th><th>Var %</th></tr></thead><tbody id="tbl-over"></tbody></table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <div class="ch-title">Full Breakdown — All Ops Leaders</div>
+      <input id="ldrSearch" type="text" placeholder="Filter by leader…" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:11.5px;font-family:'Inter',sans-serif;outline:none;width:160px;background:var(--surface2);">
+    </div>
+    <div style="overflow:auto;">
+      <table class="tbl">
+        <thead><tr>
+          <th onclick="sortL('l')">Ops Leader ↕</th>
+          <th onclick="sortL('a')">Actual ↕</th><th onclick="sortL('b')">Budget ↕</th>
+          <th onclick="sortL('v')">Budget − Actual ↕</th><th onclick="sortL('p')">Var % ↕</th>
+          <th>Lodging</th><th>Transport</th><th>All Meals</th><th>Other Travel</th>
+        </tr></thead>
+        <tbody id="tbl-all"></tbody><tfoot id="tbl-foot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="sec" id="s-compliance">
+  <div class="sec-tag">04 / Compliance Overview</div>
+  <div class="sec-title">Policy Adherence by Ops Leader</div>
+  <div class="sec-sub">Weighted: Airfare Not in Concur = 3pt · Pre-Approval = 3pt · Corp CC = 2pt · Late Sub = 1pt · Advance Booking = 1pt · Meal Cost = 1pt</div>
+  <div class="sec-sub" style="margin-top:4px;">Jan–May from the Non-Compliance sheet · June merged from the OOP Message extract (951 of 967 rows map to these seven; 16 &ldquo;expense type not allowed&rdquo; rows sit outside them). Lunch &amp; dinner thresholds combined into one column; travel per diem $55 + $100 combined into Internal Meal Cost.</div>
+  <div class="divider"></div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-hdr"><div class="ch-title">Weighted Compliance Score — <span id="comp-lbl">YTD 2026</span></div></div>
+    <div class="card-body"><div style="position:relative;height:220px;width:100%;"><canvas id="compChart"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="ch-title">Full Compliance Detail</div></div>
+    <div style="overflow:auto;">
+      <table class="tbl">
+        <thead><tr><th>Ops Leader</th><th>Airfare Not in Concur (3pt)</th><th>Pre-Approval Not Obtained (3pt)</th>
+          <th>Expense Submitted Late &gt;30 Days (1pt)</th><th>Not Paid w/ Corp Card (2pt)</th>
+          <th>Avg Meal Cost Exceeded (1pt)</th><th>Internal Meal Cost Exceeded (1pt)</th>
+          <th>Trip Not Booked in Advance (1pt)</th><th>Risk Score</th><th>Level</th>
+        </tr></thead>
+        <tbody id="comp-tbody"></tbody><tfoot id="comp-tfoot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="sec" id="s-travel">
+  <div class="sec-tag">05 / Travel Split</div>
+  <div class="sec-title">Domestic vs. International — By Leader</div>
+  <div class="sec-sub">Updates with every period filter</div>
+  <div class="divider"></div>
+  <div class="srow">
+    <div class="sbox"><div class="sb-lbl">Domestic Trips</div><div class="sb-val" data-stat="dom">—</div></div>
+    <div class="sbox"><div class="sb-lbl">International Trips</div><div class="sb-val" data-stat="intl">—</div></div>
+    <div class="sbox"><div class="sb-lbl">Total Trips</div><div class="sb-val" data-stat="total">—</div></div>
+    <div class="sbox" style="background:var(--navy);border-color:var(--navy);"><div class="sb-lbl" style="color:rgba(255,255,255,0.5);">Intl Share</div><div class="sb-val" style="color:var(--blue3);" data-stat="share">—</div></div>
+    <div class="sbox"><div class="sb-lbl">Highest Volume</div><div class="sb-val" style="font-size:14px;margin-top:6px;" data-stat="topldr">—</div></div>
+    <div class="sbox"><div class="sb-lbl">Top Leader Trips</div><div class="sb-val" data-stat="toptrips">—</div></div>
+    <div class="sbox"><div class="sb-lbl">Highest Intl Count</div><div class="sb-val" style="font-size:13px;margin-top:6px;" data-stat="intlldr">—</div></div>
+  </div>
+  <div class="g2">
+    <div class="card" style="display:flex;flex-direction:column;"><div class="card-body" style="flex:1;"><div style="position:relative;height:100%;min-height:260px;width:100%;"><canvas id="splitChart"></canvas></div></div></div>
+    <div class="card">
+      <div class="card-hdr"><div class="ch-title">Trip Mix — <span id="travel-lbl">YTD 2026</span></div></div>
+      <table class="tbl">
+        <thead><tr><th>Ops Leader</th><th>Domestic</th><th>International</th><th>Total</th><th>Intl %</th></tr></thead>
+        <tbody id="travel-tbody"></tbody><tfoot id="travel-tfoot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="sec" id="s-airfare">
+  <div class="sec-tag">06 / Airfare Intelligence</div>
+  <div class="sec-title">Ticket Analysis — Jan through Jun 2026</div>
+  <div class="sec-sub">3,946 tickets · $2,221,898 total airfare spend · keyed on Issue Date &nbsp;·&nbsp; service class available for 3,343 of these tickets</div>
+  <div class="divider"></div>
+  <div class="srow">
+    <div class="sbox"><div class="sb-lbl">Total Airfare Spend</div><div class="sb-val">$2,222K</div></div>
+    <div class="sbox"><div class="sb-lbl">Total Tickets</div><div class="sb-val">3,946</div></div>
+    <div class="sbox"><div class="sb-lbl">Coach (94.8%)</div><div class="sb-val">3,170</div></div>
+    <div class="sbox"><div class="sb-lbl">Business (3.8%)</div><div class="sb-val" style="color:var(--rose2);">128</div></div>
+    <div class="sbox"><div class="sb-lbl">First Class (1.3%)</div><div class="sb-val" style="color:var(--rose2);">45</div></div>
+    <div class="sbox"><div class="sb-lbl">Avg Ticket Cost</div><div class="sb-val">$563</div></div>
+  </div>
+  <div class="card"><div class="card-hdr"><div class="ch-title">Service Class Split</div></div><div class="card-body"><div style="position:relative;height:260px;width:100%;"><canvas id="airClassChart"></canvas></div></div></div>
+</div>
+
+<div class="sec" id="s-hotel">
+  <div class="sec-tag">07 / Hotel Spend</div>
+  <div class="sec-title">Hotel Analysis — Jan through Jun 2026</div>
+  <div class="sec-sub">2,573 stays · $1,179,119 total · 5,925 nights · Avg $199/night · keyed on Issue Date</div>
+  <div class="divider"></div>
+  <div class="srow">
+    <div class="sbox"><div class="sb-lbl">Total Hotel Spend</div><div class="sb-val">$1,179K</div></div>
+    <div class="sbox"><div class="sb-lbl">Total Stays</div><div class="sb-val">2,573</div></div>
+    <div class="sbox"><div class="sb-lbl">Total Nights</div><div class="sb-val">5,925</div></div>
+    <div class="sbox"><div class="sb-lbl">Avg Nightly Rate</div><div class="sb-val">$199</div></div>
+    <div class="sbox"><div class="sb-lbl">Internal Meeting (34.4%)</div><div class="sb-val">$391K</div></div>
+    <div class="sbox"><div class="sb-lbl">Maintenance And Installation (27.6%)</div><div class="sb-val">$315K</div></div>
+  </div>
+  <div class="card"><div class="card-hdr"><div class="ch-title">Trip Purpose Split</div></div><div class="card-body"><div style="position:relative;height:260px;width:100%;"><canvas id="hotelPurposeChart"></canvas></div></div></div>
+</div>
+
+<div class="sec" id="s-savings">
+  <div class="sec-tag">08 / Meridian Travel Savings</div>
+  <div class="sec-title">Corporate Travel Program — 2026 Savings Tracker</div>
+  <div class="sec-sub">2,864 bookings · $111,554.99 total savings · Avg $38.95 per booking · Jan–Jun 2026 · keyed on Issue Date</div>
+  <div class="divider"></div>
+  <div class="srow">
+    <div class="sbox" style="background:var(--navy);border-color:var(--navy);"><div class="sb-lbl" style="color:rgba(255,255,255,0.5);">Total Savings YTD</div><div class="sb-val" style="color:#6ee7b7;">$111,555</div></div>
+    <div class="sbox"><div class="sb-lbl">Hotel Savings</div><div class="sb-val" style="color:var(--emerald);">$72,520</div></div>
+    <div class="sbox"><div class="sb-lbl">Airline Savings</div><div class="sb-val" style="color:var(--blue);">$36,280</div></div>
+    <div class="sbox"><div class="sb-lbl">Car Rental Savings</div><div class="sb-val" style="color:var(--purple);">$2,756</div></div>
+    <div class="sbox"><div class="sb-lbl">Total Bookings</div><div class="sb-val">2,864</div></div>
+    <div class="sbox"><div class="sb-lbl">Avg per Booking</div><div class="sb-val">$38.95</div></div>
+  </div>
+  <div class="g2">
+    <div class="card" style="display:flex;flex-direction:column;"><div class="card-hdr"><div class="ch-title">Top 10 Vendors by Savings</div></div><div class="card-body" style="flex:1;"><div style="position:relative;height:100%;min-height:260px;width:100%;"><canvas id="savingsChart"></canvas></div></div></div>
+    <div class="card">
+      <div class="card-hdr"><div class="ch-title">Top 10 Individual Savings</div></div>
+      <table class="tbl"><thead><tr><th>Traveler</th><th>Vendor</th><th>Booked Rate</th><th>Savings</th></tr></thead>
+      <tbody><tr><td>Grayson/John</td><td>Itc Kohenur Hyderabad</td><td class='mono'>$3,143.40</td><td class='mono pos'>$960.12</td></tr>
+<tr><td>Quincy/Jennifer</td><td>Delta Airlines</td><td class='mono'>$11,951.59</td><td class='mono pos'>$714.00</td></tr>
+<tr><td>Gardner/Susan</td><td>Omni San Francisco</td><td class='mono'>$1,770.00</td><td class='mono pos'>$588.66</td></tr>
+<tr><td>Monroe/Susan</td><td>Itc Kohenur Hyderabad</td><td class='mono'>$2,103.08</td><td class='mono pos'>$490.91</td></tr>
+<tr><td>Fletcher/Emily</td><td>Fairmont Olympic Seattle</td><td class='mono'>$1,710.00</td><td class='mono pos'>$438.96</td></tr>
+<tr><td>Bradshaw/Jacob</td><td>Lufthansa</td><td class='mono'>$3,354.89</td><td class='mono pos'>$399.90</td></tr>
+<tr><td>Ingram/Donna</td><td>Holiday Inn Exp Stes Covington</td><td class='mono'>$1,941.84</td><td class='mono pos'>$389.28</td></tr>
+<tr><td>Lockhart/Sanjay</td><td>Holiday Inn Exp Stes Covington</td><td class='mono'>$1,941.84</td><td class='mono pos'>$389.28</td></tr>
+<tr><td>Chandler/Emily</td><td>American</td><td class='mono'>$11,183.19</td><td class='mono pos'>$330.00</td></tr>
+<tr><td>Sutton/Rohan</td><td>American</td><td class='mono'>$4,181.30</td><td class='mono pos'>$295.00</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+</div>
+<div class="footer">T&amp;E Summary Dashboard 2026 &nbsp;·&nbsp; Jan–Jul 2026 &nbsp;·&nbsp; Top 23 Ops Leaders + Others &nbsp;·&nbsp; Variance = Budget − Actual &nbsp;·&nbsp; Confidential</div>
+<script>
+const PERIODS_2026 = {"jan":{"label":"January 2026 (MTD)","desc":"January 1 \u2013 January 31, 2026","totalActual":617492,"totalBudget":790232,"leaders":[{"l":"Ravi Newkirk","a":184723,"b":325788,"Lo":52347,"Tr":56005,"Ml":58541,"OT":17830},{"l":"Thomas Whitfield","a":112090,"b":105730,"Lo":31800,"Tr":44458,"Ml":23123,"OT":12709},{"l":"Gary Dawson","a":43884,"b":22967,"Lo":20192,"Tr":12016,"Ml":5994,"OT":5682},{"l":"Margaret Larkin","a":43572,"b":15114,"Lo":0,"Tr":0,"Ml":44169,"OT":-597},{"l":"Ronald Vaughn","a":28199,"b":0,"Lo":9906,"Tr":12383,"Ml":5910,"OT":0},{"l":"Paul Larkin","a":23802,"b":4092,"Lo":289,"Tr":21475,"Ml":1086,"OT":952},{"l":"Margaret Grayson","a":23197,"b":7207,"Lo":3753,"Tr":4068,"Ml":11672,"OT":3704},{"l":"Susan Monroe","a":19222,"b":27882,"Lo":3472,"Tr":6672,"Ml":6995,"OT":2083},{"l":"Melissa Gardner","a":18737,"b":43983,"Lo":6421,"Tr":6728,"Ml":3511,"OT":2077},{"l":"Rohan Sutton","a":18451,"b":9197,"Lo":4442,"Tr":8467,"Ml":2311,"OT":3231},{"l":"Carol Ashford","a":16185,"b":60297,"Lo":9168,"Tr":3003,"Ml":1601,"OT":2413},{"l":"Sanjay Bennett","a":14854,"b":0,"Lo":279,"Tr":564,"Ml":13833,"OT":179},{"l":"Joshua Thackeray","a":12865,"b":33867,"Lo":2473,"Tr":456,"Ml":8536,"OT":1400},{"l":"Donna Rowland","a":11202,"b":1295,"Lo":7471,"Tr":1016,"Ml":1902,"OT":812},{"l":"Ravi Parrish","a":10683,"b":27689,"Lo":2782,"Tr":5227,"Ml":1423,"OT":1251},{"l":"Hassan Larkin","a":9654,"b":23801,"Lo":168,"Tr":7075,"Ml":1347,"OT":1064},{"l":"Gary Delacroix","a":8396,"b":20980,"Lo":2389,"Tr":2618,"Ml":2169,"OT":1219},{"l":"Jacob Kensington","a":4644,"b":18038,"Lo":1326,"Tr":1798,"Ml":542,"OT":978},{"l":"Deborah Wexford","a":3510,"b":14554,"Lo":492,"Tr":2282,"Ml":230,"OT":506},{"l":"Susan Whitfield","a":3324,"b":4440,"Lo":1214,"Tr":507,"Ml":406,"OT":1197},{"l":"Yusuf Yates","a":3116,"b":3060,"Lo":1028,"Tr":951,"Ml":300,"OT":837},{"l":"Sofia Griffith","a":1437,"b":1819,"Lo":314,"Tr":730,"Ml":0,"OT":394},{"l":"Marcus Wexford","a":1128,"b":0,"Lo":179,"Tr":931,"Ml":0,"OT":18},{"l":"Others","a":618,"b":18431,"Lo":0,"Tr":-20,"Ml":632,"OT":6,"_n":5}],"categories":[{"cat":"Client Entertainment","a":0,"b":2021},{"cat":"Client Meals","a":48047,"b":45748},{"cat":"Concur Reserve","a":0,"b":250},{"cat":"Employee Entertainment","a":0,"b":417},{"cat":"Employee Travel Meals","a":99061,"b":79051},{"cat":"Lodging","a":161904,"b":283529},{"cat":"Meals - Employee Non-Travel Meals","a":49125,"b":41523},{"cat":"Meals - Office Holiday Parties/Picnics","a":0,"b":-24452},{"cat":"Other Travel","a":59945,"b":87509},{"cat":"Transportation","a":199410,"b":274637}]},"feb":{"label":"February 2026 (MTD)","desc":"February 1 \u2013 February 28, 2026","totalActual":952466,"totalBudget":844733,"leaders":[{"l":"Ravi Newkirk","a":295130,"b":371793,"Lo":104457,"Tr":86447,"Ml":75728,"OT":28499},{"l":"Thomas Whitfield","a":237501,"b":106379,"Lo":74593,"Tr":100715,"Ml":42905,"OT":19288},{"l":"Marcus Wexford","a":57356,"b":4000,"Lo":2042,"Tr":672,"Ml":53850,"OT":791},{"l":"Melissa Gardner","a":46911,"b":43983,"Lo":16596,"Tr":20050,"Ml":5757,"OT":4507},{"l":"Carol Ashford","a":44831,"b":34506,"Lo":24720,"Tr":9405,"Ml":5176,"OT":5530},{"l":"Susan Monroe","a":41233,"b":18799,"Lo":9295,"Tr":14539,"Ml":11360,"OT":6038},{"l":"Ravi Parrish","a":35318,"b":27689,"Lo":8921,"Tr":19875,"Ml":3249,"OT":3273},{"l":"Joshua Thackeray","a":27857,"b":33867,"Lo":3503,"Tr":11860,"Ml":9745,"OT":2749},{"l":"Rohan Sutton","a":25976,"b":13902,"Lo":3413,"Tr":5555,"Ml":1556,"OT":15452},{"l":"Gary Dawson","a":23397,"b":23367,"Lo":12285,"Tr":6691,"Ml":2709,"OT":1712},{"l":"Ronald Vaughn","a":23093,"b":0,"Lo":7888,"Tr":8519,"Ml":6686,"OT":0},{"l":"Margaret Grayson","a":17008,"b":8022,"Lo":2920,"Tr":2947,"Ml":8314,"OT":2827},{"l":"Jacob Kensington","a":16472,"b":18038,"Lo":4134,"Tr":7112,"Ml":2478,"OT":2747},{"l":"Gary Delacroix","a":11374,"b":20980,"Lo":3538,"Tr":2554,"Ml":4450,"OT":832},{"l":"Paul Larkin","a":9636,"b":24725,"Lo":4052,"Tr":4020,"Ml":704,"OT":860},{"l":"Susan Whitfield","a":8759,"b":4213,"Lo":2602,"Tr":3569,"Ml":475,"OT":2113},{"l":"Hassan Larkin","a":7210,"b":21666,"Lo":2628,"Tr":2030,"Ml":893,"OT":1658},{"l":"Donna Rowland","a":7163,"b":1295,"Lo":1747,"Tr":2144,"Ml":2249,"OT":1023},{"l":"Deborah Wexford","a":5449,"b":14558,"Lo":1437,"Tr":3147,"Ml":494,"OT":370},{"l":"Karen Oakley","a":5323,"b":23255,"Lo":2848,"Tr":1675,"Ml":-213,"OT":1014},{"l":"Margaret Larkin","a":4021,"b":15114,"Lo":0,"Tr":8,"Ml":3995,"OT":18},{"l":"Sofia Griffith","a":2184,"b":1819,"Lo":782,"Tr":538,"Ml":691,"OT":173},{"l":"Yusuf Yates","a":977,"b":3060,"Lo":315,"Tr":491,"Ml":33,"OT":137},{"l":"Others","a":-1713,"b":9703,"Lo":2147,"Tr":1634,"Ml":-5969,"OT":475,"_n":5}],"categories":[{"cat":"Client Entertainment","a":0,"b":2021},{"cat":"Client Meals","a":51110,"b":87690},{"cat":"Concur Reserve","a":0,"b":250},{"cat":"Employee Entertainment","a":0,"b":417},{"cat":"Employee Travel Meals","a":111762,"b":79262},{"cat":"Lodging","a":296865,"b":286118},{"cat":"Meals - Employee Non-Travel Meals","a":74444,"b":44946},{"cat":"Meals - Office Holiday Parties/Picnics","a":0,"b":-24452},{"cat":"Other Travel","a":102087,"b":84008},{"cat":"Transportation","a":316197,"b":284473}]},"mar":{"label":"March 2026 (MTD)","desc":"March 1 \u2013 March 31, 2026","totalActual":1442039,"totalBudget":856815,"leaders":[{"l":"Others","a":576973,"b":5500,"Lo":0,"Tr":0,"Ml":873,"OT":576100,"_n":5},{"l":"Ravi Newkirk","a":253518,"b":348639,"Lo":60691,"Tr":95143,"Ml":72028,"OT":25657},{"l":"Thomas Whitfield","a":218908,"b":141943,"Lo":67859,"Tr":97074,"Ml":36008,"OT":17968},{"l":"Melissa Gardner","a":48125,"b":43983,"Lo":19259,"Tr":16767,"Ml":9128,"OT":2970},{"l":"Ronald Vaughn","a":43543,"b":0,"Lo":14320,"Tr":21943,"Ml":7280,"OT":0},{"l":"Susan Monroe","a":35640,"b":23092,"Lo":13484,"Tr":10723,"Ml":7129,"OT":4304},{"l":"Carol Ashford","a":34757,"b":36565,"Lo":6294,"Tr":17475,"Ml":6367,"OT":4621},{"l":"Ravi Parrish","a":31587,"b":27689,"Lo":7285,"Tr":19692,"Ml":1797,"OT":2813},{"l":"Jacob Kensington","a":28753,"b":27268,"Lo":4419,"Tr":20537,"Ml":1903,"OT":1895},{"l":"Margaret Grayson","a":26277,"b":8840,"Lo":7203,"Tr":7497,"Ml":7905,"OT":3672},{"l":"Karen Oakley","a":24029,"b":7281,"Lo":4503,"Tr":18477,"Ml":250,"OT":799},{"l":"Sanjay Bennett","a":23661,"b":0,"Lo":131,"Tr":132,"Ml":23399,"OT":0},{"l":"Joshua Thackeray","a":21332,"b":38283,"Lo":3559,"Tr":7023,"Ml":8720,"OT":2030},{"l":"Deborah Wexford","a":13850,"b":14583,"Lo":3548,"Tr":5544,"Ml":2844,"OT":1913},{"l":"Paul Larkin","a":12290,"b":21075,"Lo":3717,"Tr":3414,"Ml":4181,"OT":979},{"l":"Susan Whitfield","a":9798,"b":4200,"Lo":3986,"Tr":3561,"Ml":1190,"OT":1061},{"l":"Hassan Larkin","a":9236,"b":6953,"Lo":3161,"Tr":775,"Ml":3909,"OT":1392},{"l":"Gary Delacroix","a":6622,"b":20980,"Lo":1182,"Tr":3306,"Ml":1821,"OT":313},{"l":"Sofia Griffith","a":5974,"b":1912,"Lo":2305,"Tr":2438,"Ml":257,"OT":975},{"l":"Marcus Wexford","a":5193,"b":1000,"Lo":1862,"Tr":2720,"Ml":0,"OT":611},{"l":"Margaret Larkin","a":4580,"b":15114,"Lo":0,"Tr":174,"Ml":4406,"OT":0},{"l":"Rohan Sutton","a":3541,"b":38553,"Lo":3165,"Tr":5338,"Ml":2997,"OT":-7959},{"l":"Gary Dawson","a":2842,"b":22067,"Lo":945,"Tr":1577,"Ml":160,"OT":161},{"l":"Donna Rowland","a":1008,"b":1295,"Lo":604,"Tr":307,"Ml":97,"OT":0}],"categories":[{"cat":"Client Entertainment","a":0,"b":2021},{"cat":"Client Meals","a":61053,"b":65789},{"cat":"Concur Reserve","a":0,"b":250},{"cat":"Employee Entertainment","a":793,"b":417},{"cat":"Employee Travel Meals","a":78248,"b":77867},{"cat":"Lodging","a":233481,"b":281617},{"cat":"Meals - Employee Non-Travel Meals","a":64554,"b":53435},{"cat":"Meals - Office Holiday Parties/Picnics","a":0,"b":-24452},{"cat":"Other Travel","a":642275,"b":90447},{"cat":"Transportation","a":361635,"b":309424}]},"apr":{"label":"April 2026 (MTD)","desc":"April 1 \u2013 April 30, 2026","totalActual":1017600,"totalBudget":857624,"leaders":[{"l":"Ravi Newkirk","a":283990,"b":352755,"Lo":65770,"Tr":105885,"Ml":80153,"OT":32181},{"l":"Thomas Whitfield","a":232398,"b":156470,"Lo":66554,"Tr":109070,"Ml":39411,"OT":17363},{"l":"Melissa Gardner","a":63620,"b":43983,"Lo":20317,"Tr":31494,"Ml":7340,"OT":4469},{"l":"Gary Dawson","a":41227,"b":20500,"Lo":19526,"Tr":11562,"Ml":5087,"OT":5051},{"l":"Ronald Vaughn","a":40289,"b":0,"Lo":13613,"Tr":17273,"Ml":9403,"OT":0},{"l":"Rohan Sutton","a":38201,"b":7254,"Lo":4050,"Tr":10490,"Ml":2646,"OT":21015},{"l":"Sanjay Bennett","a":34089,"b":1445,"Lo":685,"Tr":277,"Ml":32962,"OT":166},{"l":"Ravi Parrish","a":33926,"b":27689,"Lo":8470,"Tr":12953,"Ml":8943,"OT":3560},{"l":"Paul Larkin","a":31667,"b":15715,"Lo":13323,"Tr":13503,"Ml":3050,"OT":1791},{"l":"Carol Ashford","a":31056,"b":42338,"Lo":8971,"Tr":14395,"Ml":2273,"OT":5416},{"l":"Joshua Thackeray","a":25112,"b":37315,"Lo":8970,"Tr":4704,"Ml":8312,"OT":3125},{"l":"Susan Monroe","a":22971,"b":26775,"Lo":6593,"Tr":9066,"Ml":4027,"OT":3286},{"l":"Margaret Grayson","a":22387,"b":8847,"Lo":1790,"Tr":7964,"Ml":9944,"OT":2688},{"l":"Jacob Kensington","a":19549,"b":20388,"Lo":6104,"Tr":9035,"Ml":2727,"OT":1684},{"l":"Deborah Wexford","a":18661,"b":14750,"Lo":6422,"Tr":7571,"Ml":2641,"OT":2026},{"l":"Karen Oakley","a":16902,"b":28316,"Lo":5306,"Tr":6807,"Ml":1197,"OT":3592},{"l":"Donna Rowland","a":15928,"b":1295,"Lo":7121,"Tr":3957,"Ml":3763,"OT":1087},{"l":"Margaret Larkin","a":11265,"b":15114,"Lo":0,"Tr":0,"Ml":11264,"OT":2},{"l":"Hassan Larkin","a":9330,"b":5318,"Lo":1676,"Tr":2446,"Ml":4113,"OT":1095},{"l":"Susan Whitfield","a":8305,"b":4319,"Lo":2544,"Tr":4097,"Ml":355,"OT":1309},{"l":"Sofia Griffith","a":6857,"b":2305,"Lo":2241,"Tr":1878,"Ml":1442,"OT":1296},{"l":"Marcus Wexford","a":5488,"b":0,"Lo":1706,"Tr":2740,"Ml":139,"OT":904},{"l":"Gary Delacroix","a":3574,"b":20980,"Lo":544,"Tr":1074,"Ml":1676,"OT":280},{"l":"Others","a":808,"b":3753,"Lo":808,"Tr":0,"Ml":0,"OT":0,"_n":5}],"categories":[{"cat":"Client Entertainment","a":0,"b":2021},{"cat":"Client Meals","a":50066,"b":76209},{"cat":"Concur Reserve","a":0,"b":250},{"cat":"Employee Entertainment","a":225,"b":417},{"cat":"Employee Travel Meals","a":114405,"b":77207},{"cat":"Lodging","a":273105,"b":283947},{"cat":"Meals - Employee Non-Travel Meals","a":78172,"b":54149},{"cat":"Meals - Office Holiday Parties/Picnics","a":0,"b":-24452},{"cat":"Other Travel","a":113386,"b":90640},{"cat":"Transportation","a":388241,"b":297236}]},"may":{"label":"May 2026 (MTD)","desc":"May 1 \u2013 May 31, 2026","totalActual":1364223,"totalBudget":862421,"leaders":[{"l":"Ravi Newkirk","a":403862,"b":332249,"Lo":87754,"Tr":140001,"Ml":133453,"OT":42654},{"l":"Thomas Whitfield","a":274575,"b":168243,"Lo":71471,"Tr":140656,"Ml":40326,"OT":22123},{"l":"Joshua Thackeray","a":69744,"b":38575,"Lo":3228,"Tr":50673,"Ml":12360,"OT":3484},{"l":"Carol Ashford","a":62777,"b":27856,"Lo":15503,"Tr":27506,"Ml":8004,"OT":11764},{"l":"Susan Monroe","a":56139,"b":16554,"Lo":16246,"Tr":28058,"Ml":5997,"OT":5837},{"l":"Melissa Gardner","a":53085,"b":43983,"Lo":15793,"Tr":22324,"Ml":9454,"OT":5514},{"l":"Jacob Kensington","a":50823,"b":18038,"Lo":16547,"Tr":19210,"Ml":9852,"OT":5214},{"l":"Ravi Parrish","a":47138,"b":27689,"Lo":12793,"Tr":28084,"Ml":1558,"OT":4703},{"l":"Paul Larkin","a":46621,"b":35490,"Lo":9777,"Tr":24120,"Ml":9240,"OT":3485},{"l":"Gary Delacroix","a":41875,"b":20980,"Lo":25388,"Tr":6949,"Ml":6298,"OT":3240},{"l":"Ronald Vaughn","a":41331,"b":0,"Lo":7181,"Tr":20883,"Ml":13268,"OT":0},{"l":"Margaret Grayson","a":32475,"b":8847,"Lo":4243,"Tr":11838,"Ml":11132,"OT":5263},{"l":"Sanjay Bennett","a":26057,"b":0,"Lo":-97,"Tr":26,"Ml":26128,"OT":0},{"l":"Rohan Sutton","a":24844,"b":37326,"Lo":6595,"Tr":8624,"Ml":6796,"OT":2829},{"l":"Deborah Wexford","a":21801,"b":14755,"Lo":1831,"Tr":16698,"Ml":2267,"OT":1004},{"l":"Gary Dawson","a":19649,"b":22600,"Lo":7081,"Tr":5290,"Ml":4649,"OT":2628},{"l":"Hassan Larkin","a":18170,"b":13190,"Lo":4236,"Tr":10428,"Ml":1589,"OT":1917},{"l":"Susan Whitfield","a":16296,"b":4248,"Lo":1270,"Tr":10110,"Ml":1152,"OT":3764},{"l":"Karen Oakley","a":16049,"b":6242,"Lo":3582,"Tr":11242,"Ml":618,"OT":606},{"l":"Donna Rowland","a":11691,"b":1295,"Lo":3542,"Tr":2747,"Ml":4038,"OT":1364},{"l":"Margaret Larkin","a":10194,"b":15114,"Lo":0,"Tr":-175,"Ml":10299,"OT":70},{"l":"Marcus Wexford","a":6844,"b":4000,"Lo":1009,"Tr":4963,"Ml":308,"OT":565},{"l":"Sofia Griffith","a":6425,"b":2037,"Lo":1164,"Tr":2270,"Ml":1824,"OT":1167},{"l":"Others","a":5757,"b":3110,"Lo":2640,"Tr":1138,"Ml":905,"OT":1075,"_n":5}],"categories":[{"cat":"Client Entertainment","a":5913,"b":2021},{"cat":"Client Meals","a":90396,"b":53291},{"cat":"Concur Reserve","a":0,"b":250},{"cat":"Employee Entertainment","a":500,"b":417},{"cat":"Employee Travel Meals","a":136982,"b":74218},{"cat":"Lodging","a":318777,"b":289053},{"cat":"Meals - Employee Non-Travel Meals","a":87725,"b":56617},{"cat":"Meals - Office Holiday Parties/Picnics","a":0,"b":-24452},{"cat":"Other Travel","a":130268,"b":92231},{"cat":"Transportation","a":593663,"b":318776}]},"jun":{"label":"June 2026 (MTD)","desc":"June 1 \u2013 June 30, 2026","totalActual":1858058,"totalBudget":856038,"leaders":[{"l":"Others","a":575007,"b":31335,"Lo":0,"Tr":0,"Ml":0,"OT":575007,"_n":5},{"l":"Ravi Newkirk","a":419867,"b":334565,"Lo":153945,"Tr":131489,"Ml":89820,"OT":44614},{"l":"Thomas Whitfield","a":224493,"b":155304,"Lo":78953,"Tr":90832,"Ml":36737,"OT":17971},{"l":"Susan Monroe","a":95823,"b":17622,"Lo":27365,"Tr":48551,"Ml":12575,"OT":7332},{"l":"Joshua Thackeray","a":79534,"b":39671,"Lo":20539,"Tr":27249,"Ml":26251,"OT":5494},{"l":"Melissa Gardner","a":66683,"b":43983,"Lo":21908,"Tr":27629,"Ml":10036,"OT":7111},{"l":"Rohan Sutton","a":55022,"b":36427,"Lo":10452,"Tr":14674,"Ml":3231,"OT":26664},{"l":"Jacob Kensington","a":47911,"b":20038,"Lo":16773,"Tr":19266,"Ml":6283,"OT":5589},{"l":"Carol Ashford","a":43310,"b":41027,"Lo":15261,"Tr":15175,"Ml":8259,"OT":4615},{"l":"Paul Larkin","a":40412,"b":8889,"Lo":9556,"Tr":7883,"Ml":19875,"OT":3098},{"l":"Ronald Vaughn","a":39235,"b":0,"Lo":1217,"Tr":6253,"Ml":31766,"OT":0},{"l":"Gary Dawson","a":29896,"b":22600,"Lo":19243,"Tr":6020,"Ml":2833,"OT":1800},{"l":"Margaret Grayson","a":22198,"b":8847,"Lo":3666,"Tr":6035,"Ml":9940,"OT":2556},{"l":"Ravi Parrish","a":20683,"b":27689,"Lo":7209,"Tr":9402,"Ml":1912,"OT":2159},{"l":"Donna Rowland","a":20567,"b":1295,"Lo":9464,"Tr":5240,"Ml":3151,"OT":2712},{"l":"Deborah Wexford","a":14011,"b":14755,"Lo":3459,"Tr":4826,"Ml":3441,"OT":2285},{"l":"Susan Whitfield","a":13987,"b":3216,"Lo":7744,"Tr":1922,"Ml":1205,"OT":3116},{"l":"Gary Delacroix","a":11009,"b":20980,"Lo":4662,"Tr":3463,"Ml":1774,"OT":1110},{"l":"Marcus Wexford","a":9739,"b":5000,"Lo":2924,"Tr":3541,"Ml":1452,"OT":1822},{"l":"Hassan Larkin","a":9213,"b":6685,"Lo":1699,"Tr":2187,"Ml":4089,"OT":1239},{"l":"Karen Oakley","a":7600,"b":6214,"Lo":2275,"Tr":4104,"Ml":100,"OT":1121},{"l":"Sofia Griffith","a":6112,"b":1819,"Lo":1868,"Tr":2753,"Ml":711,"OT":781},{"l":"Yusuf Yates","a":4591,"b":3060,"Lo":548,"Tr":2195,"Ml":888,"OT":959},{"l":"Sanjay Bennett","a":1153,"b":5015,"Lo":899,"Tr":-25,"Ml":0,"OT":280}],"categories":[{"cat":"Client Entertainment","a":8545,"b":2021},{"cat":"Client Meals","a":65548,"b":75573},{"cat":"Concur Reserve","a":0,"b":250},{"cat":"Employee Entertainment","a":16352,"b":417},{"cat":"Employee Travel Meals","a":98407,"b":82133},{"cat":"Lodging","a":421629,"b":274513},{"cat":"Meals - Employee Non-Travel Meals","a":87479,"b":56423},{"cat":"Meals - Office Holiday Parties/Picnics","a":0,"b":-24452},{"cat":"Other Travel","a":719434,"b":94213},{"cat":"Transportation","a":440664,"b":294947}]},"jul":{"label":"July 2026 (MTD)","desc":"July 1 \u2013 July 31, 2026","totalActual":1439141,"totalBudget":986593,"leaders":[{"l":"Ravi Newkirk","a":1133977,"b":365090,"Lo":108873,"Tr":199681,"Ml":767352,"OT":58069},{"l":"Thomas Whitfield","a":505403,"b":151455,"Lo":86117,"Tr":142932,"Ml":243205,"OT":33149},{"l":"Melissa Gardner","a":241816,"b":86983,"Lo":25072,"Tr":46356,"Ml":162225,"OT":8162},{"l":"Rohan Sutton","a":145404,"b":28491,"Lo":7276,"Tr":24164,"Ml":75074,"OT":38890},{"l":"Susan Monroe","a":141461,"b":33643,"Lo":16643,"Tr":32337,"Ml":84106,"OT":8375},{"l":"Ravi Parrish","a":93422,"b":27689,"Lo":10862,"Tr":27610,"Ml":50398,"OT":4551},{"l":"Carol Ashford","a":92882,"b":33830,"Lo":7413,"Tr":15605,"Ml":64143,"OT":5720},{"l":"Jacob Kensington","a":85775,"b":18038,"Lo":11613,"Tr":11999,"Ml":59018,"OT":3145},{"l":"Deborah Wexford","a":83923,"b":14755,"Lo":15810,"Tr":35545,"Ml":30786,"OT":1782},{"l":"Gary Dawson","a":82732,"b":29400,"Lo":16154,"Tr":11906,"Ml":49407,"OT":5265},{"l":"Paul Larkin","a":80102,"b":14585,"Lo":6586,"Tr":9585,"Ml":62734,"OT":1198},{"l":"Hassan Larkin","a":76818,"b":7996,"Lo":10450,"Tr":17514,"Ml":44253,"OT":4602},{"l":"Joshua Thackeray","a":62255,"b":35203,"Lo":6931,"Tr":9769,"Ml":39164,"OT":6391},{"l":"Ronald Vaughn","a":55034,"b":0,"Lo":4774,"Tr":43168,"Ml":7092,"OT":0},{"l":"Margaret Grayson","a":52438,"b":22557,"Lo":7399,"Tr":9447,"Ml":32484,"OT":3109},{"l":"Karen Oakley","a":40943,"b":9245,"Lo":8914,"Tr":23721,"Ml":6754,"OT":1553},{"l":"Gary Delacroix","a":29147,"b":20980,"Lo":5280,"Tr":4182,"Ml":18592,"OT":1093},{"l":"Sofia Griffith","a":26693,"b":3082,"Lo":3552,"Tr":5793,"Ml":15228,"OT":2119},{"l":"Donna Rowland","a":23420,"b":1295,"Lo":4040,"Tr":4972,"Ml":13154,"OT":1254},{"l":"Yusuf Yates","a":14120,"b":3060,"Lo":473,"Tr":2499,"Ml":10650,"OT":498},{"l":"Susan Whitfield","a":13286,"b":3267,"Lo":1097,"Tr":1339,"Ml":9485,"OT":1365},{"l":"Marcus Wexford","a":8658,"b":0,"Lo":0,"Tr":204,"Ml":8315,"OT":139},{"l":"Meera Ingram","a":6748,"b":2578,"Lo":0,"Tr":0,"Ml":6738,"OT":10},{"l":"Others","a":-1657315,"b":73372,"Lo":1280,"Tr":1419,"Ml":-509846,"OT":-1150169,"_n":5}],"categories":[{"cat":"Client Entertainment","a":7039,"b":2021},{"cat":"Client Meals","a":143252,"b":106610},{"cat":"Concur Reserve","a":977386,"b":250},{"cat":"Employee Entertainment","a":14237,"b":417},{"cat":"Employee Travel Meals","a":108694,"b":125978},{"cat":"Lodging","a":366609,"b":307712},{"cat":"Meals - Employee Non-Travel Meals","a":99908,"b":53246},{"cat":"Meals - Office Holiday Parties/Picnics","a":0,"b":-24452},{"cat":"Other Travel","a":-959731,"b":94220},{"cat":"Transportation","a":681748,"b":320590}]},"q1":{"label":"Q1 2026","desc":"Jan 1 \u2013 Mar 31, 2026","totalActual":3011997,"totalBudget":2491779,"leaders":[{"l":"Ravi Newkirk","a":733372,"b":1046220,"Lo":217495,"Tr":237594,"Ml":206296,"OT":71987},{"l":"Others","a":581065,"b":11760,"Lo":1343,"Tr":1442,"Ml":1206,"OT":577074,"_n":5},{"l":"Thomas Whitfield","a":568499,"b":354053,"Lo":174252,"Tr":242247,"Ml":102036,"OT":49965},{"l":"Melissa Gardner","a":113772,"b":131949,"Lo":42276,"Tr":43545,"Ml":18397,"OT":9554},{"l":"Susan Monroe","a":96095,"b":69774,"Lo":26252,"Tr":31935,"Ml":25483,"OT":12425},{"l":"Carol Ashford","a":95773,"b":131368,"Lo":40182,"Tr":29882,"Ml":13144,"OT":12564},{"l":"Ronald Vaughn","a":94835,"b":0,"Lo":32114,"Tr":42845,"Ml":19876,"OT":0},{"l":"Ravi Parrish","a":77588,"b":83066,"Lo":18988,"Tr":44794,"Ml":6468,"OT":7338},{"l":"Gary Dawson","a":70123,"b":68400,"Lo":33422,"Tr":20283,"Ml":8863,"OT":7555},{"l":"Margaret Grayson","a":66482,"b":24069,"Lo":13877,"Tr":14512,"Ml":27890,"OT":10202},{"l":"Marcus Wexford","a":63676,"b":5000,"Lo":4083,"Tr":4324,"Ml":53850,"OT":1420},{"l":"Joshua Thackeray","a":62054,"b":106017,"Lo":9535,"Tr":19339,"Ml":27002,"OT":6179},{"l":"Margaret Larkin","a":52173,"b":45342,"Lo":0,"Tr":181,"Ml":52570,"OT":-579},{"l":"Jacob Kensington","a":49870,"b":63344,"Lo":9879,"Tr":29447,"Ml":4923,"OT":5620},{"l":"Rohan Sutton","a":47968,"b":61651,"Lo":11020,"Tr":19360,"Ml":6864,"OT":10724},{"l":"Paul Larkin","a":45729,"b":49891,"Lo":8058,"Tr":28909,"Ml":5971,"OT":2791},{"l":"Sanjay Bennett","a":36802,"b":9653,"Lo":2557,"Tr":2330,"Ml":31262,"OT":653},{"l":"Karen Oakley","a":29970,"b":48877,"Lo":7351,"Tr":20131,"Ml":669,"OT":1819},{"l":"Gary Delacroix","a":26392,"b":62940,"Lo":7110,"Tr":8479,"Ml":8441,"OT":2364},{"l":"Hassan Larkin","a":26100,"b":52421,"Lo":5957,"Tr":9880,"Ml":6149,"OT":4114},{"l":"Deborah Wexford","a":22808,"b":43695,"Lo":5477,"Tr":10974,"Ml":3569,"OT":2788},{"l":"Susan Whitfield","a":21881,"b":12854,"Lo":7801,"Tr":7637,"Ml":2072,"OT":4371},{"l":"Donna Rowland","a":19372,"b":3885,"Lo":9822,"Tr":3467,"Ml":4248,"OT":1835},{"l":"Sofia Griffith","a":9596,"b":5550,"Lo":3401,"Tr":3706,"Ml":947,"OT":1541}],"categories":[{"cat":"Client Entertainment","a":0,"b":6062},{"cat":"Client Meals","a":160210,"b":199226},{"cat":"Concur Reserve","a":0,"b":750},{"cat":"Employee Entertainment","a":793,"b":1250},{"cat":"Employee Travel Meals","a":289071,"b":236180},{"cat":"Lodging","a":692250,"b":851264},{"cat":"Meals - Employee Non-Travel Meals","a":188123,"b":139904},{"cat":"Meals - Office Holiday Parties/Picnics","a":0,"b":-73355},{"cat":"Other Travel","a":804307,"b":261964},{"cat":"Transportation","a":877242,"b":868534}]},"q2":{"label":"Q2 2026 (Apr\u2013Jun)","desc":"Apr 1 \u2013 Jun 30, 2026","totalActual":4239881,"totalBudget":2576083,"leaders":[{"l":"Ravi Newkirk","a":1107719,"b":1019569,"Lo":307468,"Tr":377375,"Ml":303426,"OT":119449},{"l":"Thomas Whitfield","a":731466,"b":480017,"Lo":216978,"Tr":340557,"Ml":116474,"OT":57456},{"l":"Others","a":586157,"b":11145,"Lo":3996,"Tr":3332,"Ml":1794,"OT":577034,"_n":5},{"l":"Melissa Gardner","a":183388,"b":131949,"Lo":58018,"Tr":81447,"Ml":26830,"OT":17094},{"l":"Susan Monroe","a":174933,"b":60950,"Lo":50204,"Tr":85675,"Ml":22599,"OT":16455},{"l":"Joshua Thackeray","a":174390,"b":115561,"Lo":32737,"Tr":82626,"Ml":46924,"OT":12103},{"l":"Carol Ashford","a":137143,"b":111221,"Lo":39735,"Tr":57076,"Ml":18537,"OT":21795},{"l":"Ronald Vaughn","a":120856,"b":0,"Lo":22011,"Tr":44409,"Ml":54436,"OT":0},{"l":"Paul Larkin","a":118701,"b":60094,"Lo":32655,"Tr":45506,"Ml":32165,"OT":8374},{"l":"Jacob Kensington","a":118283,"b":58464,"Lo":39424,"Tr":47511,"Ml":18862,"OT":12486},{"l":"Rohan Sutton","a":118068,"b":81007,"Lo":21098,"Tr":33788,"Ml":12674,"OT":50509},{"l":"Ravi Parrish","a":101746,"b":83066,"Lo":28473,"Tr":50439,"Ml":12412,"OT":10422},{"l":"Gary Dawson","a":90773,"b":65700,"Lo":45851,"Tr":22873,"Ml":12569,"OT":9479},{"l":"Margaret Grayson","a":77059,"b":26542,"Lo":9699,"Tr":25837,"Ml":31017,"OT":10506},{"l":"Sanjay Bennett","a":61299,"b":6460,"Lo":1486,"Tr":278,"Ml":59089,"OT":445},{"l":"Gary Delacroix","a":56459,"b":62940,"Lo":30594,"Tr":11486,"Ml":9749,"OT":4630},{"l":"Deborah Wexford","a":54473,"b":44261,"Lo":11713,"Tr":29095,"Ml":8350,"OT":5315},{"l":"Donna Rowland","a":48185,"b":3885,"Lo":20128,"Tr":11943,"Ml":10952,"OT":5162},{"l":"Karen Oakley","a":40551,"b":40772,"Lo":11163,"Tr":22153,"Ml":1915,"OT":5319},{"l":"Susan Whitfield","a":38587,"b":11784,"Lo":11558,"Tr":16129,"Ml":2711,"OT":8189},{"l":"Hassan Larkin","a":36713,"b":25193,"Lo":7611,"Tr":15061,"Ml":9791,"OT":4250},{"l":"Marcus Wexford","a":22071,"b":9000,"Lo":5639,"Tr":11244,"Ml":1898,"OT":3290},{"l":"Margaret Larkin","a":21467,"b":60342,"Lo":0,"Tr":-175,"Ml":21563,"OT":79},{"l":"Sofia Griffith","a":19394,"b":6161,"Lo":5272,"Tr":6900,"Ml":3977,"OT":3244}],"categories":[{"cat":"Client Entertainment","a":14458,"b":6062},{"cat":"Client Meals","a":206010,"b":205073},{"cat":"Concur Reserve","a":0,"b":750},{"cat":"Employee Entertainment","a":17077,"b":1250},{"cat":"Employee Travel Meals","a":349794,"b":233558},{"cat":"Lodging","a":1013511,"b":847513},{"cat":"Meals - Employee Non-Travel Meals","a":253375,"b":167188},{"cat":"Meals - Office Holiday Parties/Picnics","a":0,"b":-73355},{"cat":"Other Travel","a":963089,"b":277084},{"cat":"Transportation","a":1422568,"b":910960}]},"ytd":{"label":"YTD 2026 (Jan\u2013Jul)","desc":"Jan 1 \u2013 Jul 31, 2026","totalActual":8691019,"totalBudget":6054456,"leaders":[{"l":"Ravi Newkirk","a":2975068,"b":2430879,"Lo":633837,"Tr":814650,"Ml":1277075,"OT":249506},{"l":"Thomas Whitfield","a":1805368,"b":985526,"Lo":477347,"Tr":725736,"Ml":461715,"OT":140570},{"l":"Melissa Gardner","a":538976,"b":350881,"Lo":125366,"Tr":171348,"Ml":207452,"OT":34810},{"l":"Susan Monroe","a":412489,"b":164368,"Lo":93099,"Tr":149946,"Ml":132189,"OT":37256},{"l":"Carol Ashford","a":325798,"b":276419,"Lo":87329,"Tr":102564,"Ml":95824,"OT":40080},{"l":"Rohan Sutton","a":311440,"b":171149,"Lo":39394,"Tr":77312,"Ml":94612,"OT":100123},{"l":"Joshua Thackeray","a":298698,"b":256781,"Lo":49203,"Tr":111734,"Ml":113089,"OT":24672},{"l":"Ravi Parrish","a":272756,"b":193820,"Lo":58323,"Tr":122843,"Ml":69279,"OT":22311},{"l":"Ronald Vaughn","a":270725,"b":0,"Lo":58899,"Tr":130422,"Ml":81404,"OT":0},{"l":"Jacob Kensington","a":253928,"b":139846,"Lo":60916,"Tr":88957,"Ml":82803,"OT":21252},{"l":"Paul Larkin","a":244531,"b":124570,"Lo":47299,"Tr":84000,"Ml":100870,"OT":12362},{"l":"Gary Dawson","a":243628,"b":163500,"Lo":95426,"Tr":55062,"Ml":70840,"OT":22300},{"l":"Margaret Grayson","a":195979,"b":73168,"Lo":30974,"Tr":49796,"Ml":91391,"OT":23818},{"l":"Deborah Wexford","a":161204,"b":102710,"Lo":33000,"Tr":75614,"Ml":42704,"OT":9885},{"l":"Hassan Larkin","a":139631,"b":85610,"Lo":24017,"Tr":42455,"Ml":60193,"OT":12966},{"l":"Gary Delacroix","a":111998,"b":146860,"Lo":42984,"Tr":24146,"Ml":36781,"OT":8087},{"l":"Karen Oakley","a":111463,"b":98894,"Lo":27428,"Tr":66005,"Ml":9339,"OT":8691},{"l":"Sanjay Bennett","a":101631,"b":24321,"Lo":5323,"Tr":4027,"Ml":90351,"OT":1930},{"l":"Marcus Wexford","a":94406,"b":14000,"Lo":9722,"Tr":15772,"Ml":64063,"OT":4849},{"l":"Donna Rowland","a":90978,"b":9065,"Lo":33990,"Tr":20382,"Ml":28355,"OT":8251},{"l":"Margaret Larkin","a":77211,"b":170798,"Lo":0,"Tr":7,"Ml":77705,"OT":-500},{"l":"Susan Whitfield","a":73755,"b":27904,"Lo":20457,"Tr":25105,"Ml":14269,"OT":13925},{"l":"Sofia Griffith","a":55683,"b":14793,"Lo":12225,"Tr":16399,"Ml":20153,"OT":6905},{"l":"Others","a":-476326,"b":28594,"Lo":5812,"Tr":7274,"Ml":-493029,"OT":3616,"_n":5}],"categories":[{"cat":"Client Entertainment","a":21497,"b":14145},{"cat":"Client Meals","a":509472,"b":510910},{"cat":"Concur Reserve","a":977386,"b":1750},{"cat":"Employee Entertainment","a":32107,"b":2917},{"cat":"Employee Travel Meals","a":747560,"b":595716},{"cat":"Lodging","a":2072370,"b":2006489},{"cat":"Meals - Employee Non-Travel Meals","a":541406,"b":360338},{"cat":"Meals - Office Holiday Parties/Picnics","a":0,"b":-171162},{"cat":"Other Travel","a":807664,"b":633269},{"cat":"Transportation","a":2981557,"b":2100084}]}};
+
+const COMP_2026 = {"jan":[{"l":"Ravi Newkirk","c":4,"p":2,"s":128,"cc":19,"m":8,"im":0,"a":148,"score":340},{"l":"Timothy Donovan","c":1,"p":0,"s":145,"cc":0,"m":1,"im":0,"a":1,"score":150},{"l":"Melissa Gardner","c":0,"p":0,"s":36,"cc":2,"m":0,"im":0,"a":44,"score":84},{"l":"Thomas Whitfield","c":7,"p":0,"s":29,"cc":4,"m":1,"im":0,"a":23,"score":82},{"l":"Carol Ashford","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":62,"score":63},{"l":"Deborah Wexford","c":0,"p":0,"s":20,"cc":3,"m":0,"im":0,"a":15,"score":41},{"l":"Gary Dawson","c":0,"p":0,"s":13,"cc":0,"m":2,"im":0,"a":22,"score":37},{"l":"Ravi Parrish","c":0,"p":1,"s":16,"cc":0,"m":0,"im":0,"a":11,"score":30},{"l":"Jacob Kensington","c":0,"p":0,"s":3,"cc":0,"m":0,"im":0,"a":25,"score":28},{"l":"Susan Monroe","c":0,"p":0,"s":13,"cc":4,"m":1,"im":0,"a":4,"score":26},{"l":"Deborah Griffith","c":0,"p":0,"s":9,"cc":0,"m":0,"im":0,"a":9,"score":18},{"l":"Rohan Sutton","c":0,"p":0,"s":6,"cc":2,"m":2,"im":0,"a":5,"score":17},{"l":"Yusuf Yates","c":0,"p":0,"s":9,"cc":0,"m":0,"im":0,"a":8,"score":17},{"l":"Paul Larkin","c":0,"p":0,"s":9,"cc":0,"m":0,"im":0,"a":6,"score":15},{"l":"Hassan Larkin","c":0,"p":1,"s":3,"cc":0,"m":2,"im":0,"a":6,"score":14},{"l":"CEO","c":0,"p":0,"s":1,"cc":1,"m":0,"im":0,"a":10,"score":13},{"l":"Michelle Anderson","c":0,"p":0,"s":0,"cc":0,"m":1,"im":0,"a":5,"score":6},{"l":"Hassan Radcliffe","c":0,"p":0,"s":6,"cc":0,"m":0,"im":0,"a":0,"score":6},{"l":"Edward Holloway","c":0,"p":0,"s":3,"cc":0,"m":0,"im":0,"a":0,"score":3},{"l":"Susan Whitfield","c":0,"p":0,"s":2,"cc":0,"m":0,"im":0,"a":1,"score":3},{"l":"Marcus Wexford","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":1,"score":2}],"feb":[{"l":"Ravi Newkirk","c":2,"p":0,"s":123,"cc":21,"m":8,"im":0,"a":43,"score":222},{"l":"Timothy Donovan","c":0,"p":0,"s":109,"cc":0,"m":3,"im":0,"a":3,"score":115},{"l":"Melissa Gardner","c":0,"p":0,"s":55,"cc":2,"m":2,"im":0,"a":25,"score":86},{"l":"Ravi Parrish","c":0,"p":0,"s":50,"cc":2,"m":0,"im":13,"a":2,"score":69},{"l":"Thomas Whitfield","c":13,"p":0,"s":12,"cc":1,"m":0,"im":0,"a":8,"score":61},{"l":"Carol Ashford","c":0,"p":1,"s":29,"cc":0,"m":4,"im":0,"a":8,"score":44},{"l":"Susan Monroe","c":1,"p":0,"s":25,"cc":0,"m":3,"im":1,"a":6,"score":38},{"l":"Deborah Wexford","c":0,"p":1,"s":18,"cc":3,"m":0,"im":0,"a":4,"score":31},{"l":"Rohan Sutton","c":0,"p":0,"s":25,"cc":1,"m":0,"im":0,"a":3,"score":30},{"l":"Jacob Kensington","c":2,"p":0,"s":11,"cc":5,"m":1,"im":0,"a":1,"score":29},{"l":"Michelle Anderson","c":0,"p":1,"s":22,"cc":0,"m":1,"im":1,"a":1,"score":28},{"l":"Yusuf Yates","c":1,"p":1,"s":9,"cc":0,"m":0,"im":0,"a":7,"score":22},{"l":"Paul Larkin","c":0,"p":0,"s":10,"cc":1,"m":0,"im":0,"a":2,"score":14},{"l":"Deborah Griffith","c":0,"p":0,"s":12,"cc":0,"m":0,"im":0,"a":2,"score":14},{"l":"Gary Dawson","c":0,"p":0,"s":7,"cc":1,"m":0,"im":2,"a":1,"score":12},{"l":"CEO","c":1,"p":0,"s":4,"cc":0,"m":0,"im":0,"a":2,"score":9},{"l":"Edward Holloway","c":0,"p":0,"s":4,"cc":0,"m":1,"im":0,"a":0,"score":5},{"l":"Hassan Larkin","c":0,"p":0,"s":2,"cc":0,"m":1,"im":0,"a":1,"score":4},{"l":"Hassan Radcliffe","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":1,"score":2},{"l":"Marcus Wexford","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":0,"score":1}],"mar":[{"l":"Ravi Newkirk","c":3,"p":1,"s":147,"cc":25,"m":3,"im":3,"a":150,"score":365},{"l":"Thomas Whitfield","c":11,"p":0,"s":64,"cc":1,"m":1,"im":3,"a":112,"score":215},{"l":"Melissa Gardner","c":0,"p":1,"s":50,"cc":3,"m":1,"im":1,"a":28,"score":89},{"l":"Timothy Donovan","c":0,"p":0,"s":47,"cc":1,"m":0,"im":1,"a":5,"score":55},{"l":"Susan Monroe","c":0,"p":0,"s":19,"cc":5,"m":0,"im":0,"a":22,"score":51},{"l":"Jacob Kensington","c":1,"p":0,"s":11,"cc":12,"m":0,"im":0,"a":13,"score":51},{"l":"Yusuf Yates","c":0,"p":0,"s":20,"cc":0,"m":4,"im":0,"a":15,"score":39},{"l":"Deborah Wexford","c":1,"p":0,"s":21,"cc":1,"m":2,"im":1,"a":7,"score":36},{"l":"Ravi Parrish","c":0,"p":0,"s":10,"cc":1,"m":0,"im":0,"a":23,"score":35},{"l":"Paul Larkin","c":0,"p":0,"s":11,"cc":2,"m":2,"im":0,"a":14,"score":31},{"l":"Carol Ashford","c":0,"p":1,"s":16,"cc":1,"m":2,"im":0,"a":7,"score":30},{"l":"Rohan Sutton","c":0,"p":0,"s":9,"cc":4,"m":4,"im":0,"a":1,"score":22},{"l":"Hassan Larkin","c":0,"p":0,"s":13,"cc":0,"m":5,"im":0,"a":0,"score":18},{"l":"Michelle Anderson","c":0,"p":0,"s":9,"cc":1,"m":0,"im":0,"a":4,"score":15},{"l":"Marcus Wexford","c":0,"p":2,"s":0,"cc":0,"m":0,"im":0,"a":4,"score":10},{"l":"CEO","c":1,"p":0,"s":2,"cc":0,"m":0,"im":0,"a":4,"score":9},{"l":"Gary Dawson","c":0,"p":0,"s":2,"cc":0,"m":0,"im":0,"a":7,"score":9},{"l":"Deborah Griffith","c":0,"p":0,"s":2,"cc":0,"m":1,"im":0,"a":4,"score":7},{"l":"Susan Whitfield","c":0,"p":0,"s":2,"cc":0,"m":0,"im":1,"a":4,"score":7},{"l":"Hassan Radcliffe","c":0,"p":0,"s":2,"cc":1,"m":0,"im":0,"a":1,"score":5}],"apr":[{"l":"Ravi Newkirk","c":3,"p":2,"s":157,"cc":59,"m":14,"im":6,"a":98,"score":408},{"l":"Thomas Whitfield","c":2,"p":0,"s":16,"cc":4,"m":0,"im":0,"a":104,"score":134},{"l":"Timothy Donovan","c":1,"p":0,"s":81,"cc":2,"m":2,"im":0,"a":1,"score":91},{"l":"Melissa Gardner","c":0,"p":0,"s":42,"cc":13,"m":4,"im":0,"a":16,"score":88},{"l":"Gary Dawson","c":0,"p":0,"s":40,"cc":2,"m":2,"im":2,"a":10,"score":58},{"l":"Paul Larkin","c":0,"p":0,"s":30,"cc":6,"m":4,"im":0,"a":8,"score":54},{"l":"Carol Ashford","c":0,"p":0,"s":15,"cc":1,"m":0,"im":1,"a":19,"score":37},{"l":"Ravi Parrish","c":0,"p":0,"s":7,"cc":1,"m":1,"im":0,"a":22,"score":32},{"l":"Rohan Sutton","c":0,"p":0,"s":2,"cc":9,"m":1,"im":0,"a":8,"score":29},{"l":"Susan Monroe","c":0,"p":0,"s":5,"cc":3,"m":2,"im":0,"a":15,"score":28},{"l":"Jacob Kensington","c":0,"p":1,"s":6,"cc":2,"m":1,"im":0,"a":10,"score":24},{"l":"Yusuf Yates","c":0,"p":0,"s":6,"cc":0,"m":0,"im":0,"a":18,"score":24},{"l":"Deborah Wexford","c":0,"p":1,"s":16,"cc":2,"m":0,"im":0,"a":1,"score":24},{"l":"CEO","c":0,"p":0,"s":12,"cc":1,"m":0,"im":0,"a":10,"score":24},{"l":"Michelle Anderson","c":0,"p":0,"s":11,"cc":0,"m":0,"im":0,"a":8,"score":19},{"l":"Hassan Larkin","c":0,"p":0,"s":11,"cc":0,"m":1,"im":0,"a":0,"score":12},{"l":"Hassan Radcliffe","c":0,"p":0,"s":12,"cc":0,"m":0,"im":0,"a":0,"score":12},{"l":"Deborah Griffith","c":0,"p":0,"s":2,"cc":0,"m":0,"im":0,"a":5,"score":7},{"l":"Susan Whitfield","c":0,"p":0,"s":0,"cc":0,"m":0,"im":0,"a":6,"score":6},{"l":"Sofia Griffith","c":0,"p":0,"s":1,"cc":0,"m":1,"im":0,"a":4,"score":6},{"l":"Marcus Wexford","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":2,"score":3},{"l":"Edward Holloway","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":0,"score":1}],"may":[{"l":"Ravi Newkirk","c":4,"p":1,"s":254,"cc":47,"m":20,"im":1,"a":140,"score":524},{"l":"Timothy Donovan","c":0,"p":0,"s":135,"cc":0,"m":2,"im":0,"a":0,"score":137},{"l":"Melissa Gardner","c":0,"p":2,"s":57,"cc":4,"m":0,"im":0,"a":38,"score":109},{"l":"Thomas Whitfield","c":5,"p":0,"s":29,"cc":4,"m":3,"im":1,"a":48,"score":104},{"l":"Jacob Kensington","c":1,"p":1,"s":37,"cc":15,"m":1,"im":0,"a":26,"score":100},{"l":"Michelle Anderson","c":2,"p":0,"s":40,"cc":1,"m":5,"im":1,"a":25,"score":79},{"l":"Carol Ashford","c":1,"p":0,"s":27,"cc":7,"m":7,"im":2,"a":20,"score":73},{"l":"Susan Monroe","c":2,"p":0,"s":11,"cc":7,"m":0,"im":0,"a":15,"score":46},{"l":"Rohan Sutton","c":2,"p":0,"s":9,"cc":8,"m":3,"im":0,"a":8,"score":42},{"l":"Paul Larkin","c":1,"p":1,"s":21,"cc":1,"m":3,"im":0,"a":6,"score":38},{"l":"Ravi Parrish","c":3,"p":1,"s":12,"cc":1,"m":0,"im":0,"a":10,"score":36},{"l":"Deborah Wexford","c":0,"p":2,"s":14,"cc":0,"m":0,"im":0,"a":5,"score":25},{"l":"Hassan Larkin","c":0,"p":0,"s":8,"cc":1,"m":2,"im":0,"a":9,"score":21},{"l":"CEO","c":1,"p":0,"s":3,"cc":0,"m":2,"im":0,"a":8,"score":16},{"l":"Gary Dawson","c":0,"p":0,"s":10,"cc":0,"m":0,"im":1,"a":3,"score":14},{"l":"Yusuf Yates","c":0,"p":0,"s":5,"cc":0,"m":0,"im":0,"a":9,"score":14},{"l":"Deborah Griffith","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":10,"score":11},{"l":"Marcus Wexford","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":4,"score":5},{"l":"Edward Holloway","c":0,"p":0,"s":2,"cc":0,"m":0,"im":0,"a":0,"score":2}],"jun":[{"l":"Ravi Newkirk","c":0,"p":9,"s":205,"cc":69,"m":12,"im":4,"a":0,"score":386},{"l":"Sanjay Bennett","c":0,"p":0,"s":133,"cc":0,"m":10,"im":0,"a":0,"score":143},{"l":"Susan Monroe","c":1,"p":3,"s":57,"cc":17,"m":1,"im":2,"a":0,"score":106},{"l":"Paul Larkin","c":1,"p":3,"s":58,"cc":11,"m":2,"im":3,"a":0,"score":97},{"l":"Melissa Gardner","c":0,"p":0,"s":67,"cc":5,"m":0,"im":0,"a":0,"score":77},{"l":"Carol Ashford","c":1,"p":2,"s":39,"cc":0,"m":4,"im":0,"a":0,"score":52},{"l":"Thomas Whitfield","c":3,"p":0,"s":33,"cc":3,"m":0,"im":2,"a":0,"score":50},{"l":"Timothy Donovan","c":0,"p":0,"s":41,"cc":0,"m":2,"im":1,"a":0,"score":44},{"l":"Rohan Sutton","c":1,"p":0,"s":28,"cc":0,"m":2,"im":1,"a":0,"score":34},{"l":"Jacob Kensington","c":0,"p":2,"s":22,"cc":0,"m":0,"im":0,"a":0,"score":28},{"l":"Deborah Wexford","c":0,"p":0,"s":19,"cc":1,"m":0,"im":0,"a":0,"score":21},{"l":"Gary Dawson","c":0,"p":2,"s":10,"cc":0,"m":0,"im":0,"a":0,"score":16},{"l":"Hassan Larkin","c":0,"p":0,"s":9,"cc":0,"m":5,"im":0,"a":0,"score":14},{"l":"Michelle Anderson","c":0,"p":0,"s":13,"cc":0,"m":0,"im":0,"a":0,"score":13},{"l":"Ravi Parrish","c":2,"p":0,"s":5,"cc":0,"m":0,"im":1,"a":0,"score":12},{"l":"Margaret Grayson","c":0,"p":0,"s":9,"cc":0,"m":0,"im":0,"a":0,"score":9},{"l":"Deborah Griffith","c":0,"p":0,"s":7,"cc":0,"m":0,"im":0,"a":0,"score":7},{"l":"Sofia Griffith","c":0,"p":0,"s":2,"cc":0,"m":0,"im":0,"a":0,"score":2},{"l":"Yusuf Yates","c":0,"p":0,"s":1,"cc":0,"m":1,"im":0,"a":0,"score":2},{"l":"Marcus Wexford","c":0,"p":0,"s":0,"cc":0,"m":1,"im":0,"a":0,"score":1},{"l":"Meera Ingram","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":0,"score":1},{"l":"Hassan Radcliffe","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":0,"score":1},{"l":"Edward Holloway","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":0,"score":1}],"q1":[{"l":"Ravi Newkirk","c":9,"p":3,"s":398,"cc":65,"m":19,"im":3,"a":341,"score":927},{"l":"Thomas Whitfield","c":31,"p":0,"s":105,"cc":6,"m":2,"im":3,"a":143,"score":358},{"l":"Timothy Donovan","c":1,"p":0,"s":301,"cc":1,"m":4,"im":1,"a":9,"score":320},{"l":"Melissa Gardner","c":0,"p":1,"s":141,"cc":7,"m":3,"im":1,"a":97,"score":259},{"l":"Carol Ashford","c":0,"p":2,"s":46,"cc":1,"m":6,"im":0,"a":77,"score":137},{"l":"Ravi Parrish","c":0,"p":1,"s":76,"cc":3,"m":0,"im":13,"a":36,"score":134},{"l":"Susan Monroe","c":1,"p":0,"s":57,"cc":9,"m":4,"im":1,"a":32,"score":115},{"l":"Jacob Kensington","c":3,"p":0,"s":25,"cc":17,"m":1,"im":0,"a":39,"score":108},{"l":"Deborah Wexford","c":1,"p":1,"s":59,"cc":7,"m":2,"im":1,"a":26,"score":108},{"l":"Yusuf Yates","c":1,"p":1,"s":38,"cc":0,"m":4,"im":0,"a":30,"score":78},{"l":"Rohan Sutton","c":0,"p":0,"s":40,"cc":7,"m":6,"im":0,"a":9,"score":69},{"l":"Paul Larkin","c":0,"p":0,"s":30,"cc":3,"m":2,"im":0,"a":22,"score":60},{"l":"Gary Dawson","c":0,"p":0,"s":22,"cc":1,"m":2,"im":2,"a":30,"score":58},{"l":"Michelle Anderson","c":0,"p":1,"s":31,"cc":1,"m":2,"im":1,"a":10,"score":49},{"l":"Deborah Griffith","c":0,"p":0,"s":23,"cc":0,"m":1,"im":0,"a":15,"score":39},{"l":"Hassan Larkin","c":0,"p":1,"s":18,"cc":0,"m":8,"im":0,"a":7,"score":36},{"l":"CEO","c":2,"p":0,"s":7,"cc":1,"m":0,"im":0,"a":16,"score":31},{"l":"Marcus Wexford","c":0,"p":2,"s":2,"cc":0,"m":0,"im":0,"a":5,"score":13},{"l":"Hassan Radcliffe","c":0,"p":0,"s":9,"cc":1,"m":0,"im":0,"a":2,"score":13},{"l":"Susan Whitfield","c":0,"p":0,"s":4,"cc":0,"m":0,"im":1,"a":5,"score":10},{"l":"Edward Holloway","c":0,"p":0,"s":7,"cc":0,"m":1,"im":0,"a":0,"score":8}],"q2":[{"l":"Ravi Newkirk","c":7,"p":12,"s":616,"cc":175,"m":46,"im":11,"a":238,"score":1318},{"l":"Thomas Whitfield","c":10,"p":0,"s":78,"cc":11,"m":3,"im":3,"a":152,"score":288},{"l":"Melissa Gardner","c":0,"p":2,"s":166,"cc":22,"m":4,"im":0,"a":54,"score":274},{"l":"Timothy Donovan","c":1,"p":0,"s":257,"cc":2,"m":6,"im":1,"a":1,"score":272},{"l":"Paul Larkin","c":2,"p":4,"s":109,"cc":18,"m":9,"im":3,"a":14,"score":189},{"l":"Susan Monroe","c":3,"p":3,"s":73,"cc":27,"m":3,"im":2,"a":30,"score":180},{"l":"Carol Ashford","c":2,"p":2,"s":81,"cc":8,"m":11,"im":3,"a":39,"score":162},{"l":"Jacob Kensington","c":1,"p":4,"s":65,"cc":17,"m":2,"im":0,"a":36,"score":152},{"l":"Sanjay Bennett","c":0,"p":0,"s":133,"cc":0,"m":10,"im":0,"a":0,"score":143},{"l":"Michelle Anderson","c":2,"p":0,"s":64,"cc":1,"m":5,"im":1,"a":33,"score":111},{"l":"Rohan Sutton","c":3,"p":0,"s":39,"cc":17,"m":6,"im":1,"a":16,"score":105},{"l":"Gary Dawson","c":0,"p":2,"s":60,"cc":2,"m":2,"im":3,"a":13,"score":88},{"l":"Ravi Parrish","c":5,"p":1,"s":24,"cc":2,"m":1,"im":1,"a":32,"score":80},{"l":"Deborah Wexford","c":0,"p":3,"s":49,"cc":3,"m":0,"im":0,"a":6,"score":70},{"l":"Hassan Larkin","c":0,"p":0,"s":28,"cc":1,"m":8,"im":0,"a":9,"score":47},{"l":"CEO","c":1,"p":0,"s":15,"cc":1,"m":2,"im":0,"a":18,"score":40},{"l":"Yusuf Yates","c":0,"p":0,"s":12,"cc":0,"m":1,"im":0,"a":27,"score":40},{"l":"Deborah Griffith","c":0,"p":0,"s":10,"cc":0,"m":0,"im":0,"a":15,"score":25},{"l":"Hassan Radcliffe","c":0,"p":0,"s":13,"cc":0,"m":0,"im":0,"a":0,"score":13},{"l":"Marcus Wexford","c":0,"p":0,"s":2,"cc":0,"m":1,"im":0,"a":6,"score":9},{"l":"Margaret Grayson","c":0,"p":0,"s":9,"cc":0,"m":0,"im":0,"a":0,"score":9},{"l":"Sofia Griffith","c":0,"p":0,"s":3,"cc":0,"m":1,"im":0,"a":4,"score":8},{"l":"Susan Whitfield","c":0,"p":0,"s":0,"cc":0,"m":0,"im":0,"a":6,"score":6},{"l":"Edward Holloway","c":0,"p":0,"s":4,"cc":0,"m":0,"im":0,"a":0,"score":4},{"l":"Meera Ingram","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":0,"score":1}],"ytd":[{"l":"Ravi Newkirk","c":16,"p":15,"s":1014,"cc":240,"m":65,"im":14,"a":579,"score":2245},{"l":"Thomas Whitfield","c":41,"p":0,"s":183,"cc":17,"m":5,"im":6,"a":295,"score":646},{"l":"Timothy Donovan","c":2,"p":0,"s":558,"cc":3,"m":10,"im":2,"a":10,"score":592},{"l":"Melissa Gardner","c":0,"p":3,"s":307,"cc":29,"m":7,"im":1,"a":151,"score":533},{"l":"Carol Ashford","c":2,"p":4,"s":127,"cc":9,"m":17,"im":3,"a":116,"score":299},{"l":"Susan Monroe","c":4,"p":3,"s":130,"cc":36,"m":7,"im":3,"a":62,"score":295},{"l":"Jacob Kensington","c":4,"p":4,"s":90,"cc":34,"m":3,"im":0,"a":75,"score":260},{"l":"Paul Larkin","c":2,"p":4,"s":139,"cc":21,"m":11,"im":3,"a":36,"score":249},{"l":"Ravi Parrish","c":5,"p":2,"s":100,"cc":5,"m":1,"im":14,"a":68,"score":214},{"l":"Deborah Wexford","c":1,"p":4,"s":108,"cc":10,"m":2,"im":1,"a":32,"score":178},{"l":"Rohan Sutton","c":3,"p":0,"s":79,"cc":24,"m":12,"im":1,"a":25,"score":174},{"l":"Michelle Anderson","c":2,"p":1,"s":95,"cc":2,"m":7,"im":2,"a":43,"score":160},{"l":"Gary Dawson","c":0,"p":2,"s":82,"cc":3,"m":4,"im":5,"a":43,"score":146},{"l":"Sanjay Bennett","c":0,"p":0,"s":133,"cc":0,"m":10,"im":0,"a":0,"score":143},{"l":"Yusuf Yates","c":1,"p":1,"s":50,"cc":0,"m":5,"im":0,"a":57,"score":118},{"l":"Hassan Larkin","c":0,"p":1,"s":46,"cc":1,"m":16,"im":0,"a":16,"score":83},{"l":"CEO","c":3,"p":0,"s":22,"cc":2,"m":2,"im":0,"a":34,"score":71},{"l":"Deborah Griffith","c":0,"p":0,"s":33,"cc":0,"m":1,"im":0,"a":30,"score":64},{"l":"Hassan Radcliffe","c":0,"p":0,"s":22,"cc":1,"m":0,"im":0,"a":2,"score":26},{"l":"Marcus Wexford","c":0,"p":2,"s":4,"cc":0,"m":1,"im":0,"a":11,"score":22},{"l":"Susan Whitfield","c":0,"p":0,"s":4,"cc":0,"m":0,"im":1,"a":11,"score":16},{"l":"Edward Holloway","c":0,"p":0,"s":11,"cc":0,"m":1,"im":0,"a":0,"score":12},{"l":"Margaret Grayson","c":0,"p":0,"s":9,"cc":0,"m":0,"im":0,"a":0,"score":9},{"l":"Sofia Griffith","c":0,"p":0,"s":3,"cc":0,"m":1,"im":0,"a":4,"score":8},{"l":"Meera Ingram","c":0,"p":0,"s":1,"cc":0,"m":0,"im":0,"a":0,"score":1}]};
+
+const TRAVEL_2026 = {"jan":{"totDom":552,"totIntl":21,"rows":[{"l":"Ravi Newkirk","dom":180,"intl":1},{"l":"Thomas Whitfield","dom":90,"intl":0},{"l":"Melissa Gardner","dom":57,"intl":3},{"l":"Jacob Kensington","dom":26,"intl":3},{"l":"Gary Dawson","dom":22,"intl":0},{"l":"Susan Monroe","dom":20,"intl":1},{"l":"Deborah Wexford","dom":17,"intl":0},{"l":"Ravi Parrish","dom":15,"intl":1},{"l":"Timothy Donovan","dom":9,"intl":5},{"l":"Michelle Anderson","dom":14,"intl":0},{"l":"Carol Ashford","dom":14,"intl":0},{"l":"Rohan Sutton","dom":11,"intl":0},{"l":"Daniel Jansen","dom":9,"intl":2},{"l":"Nadia Delacroix","dom":10,"intl":0},{"l":"David Oakley","dom":9,"intl":1},{"l":"Susan Whitfield","dom":8,"intl":0},{"l":"Betty Rowland","dom":6,"intl":0},{"l":"Marcus Wexford","dom":5,"intl":0},{"l":"Deborah Osborne","dom":5,"intl":0},{"l":"Margaret Grayson","dom":3,"intl":1},{"l":"Paul Larkin","dom":4,"intl":0},{"l":"Yusuf Yates","dom":4,"intl":0},{"l":"Hassan Larkin","dom":3,"intl":1},{"l":"Robert Underwood","dom":3,"intl":0},{"l":"Donna Zimmerman","dom":2,"intl":0},{"l":"Sofia Griffith","dom":2,"intl":0},{"l":"Marcus Sheridan","dom":2,"intl":0},{"l":"Layla Vaughn","dom":0,"intl":2},{"l":"CEO","dom":1,"intl":0},{"l":"Neha Parrish","dom":1,"intl":0}]},"feb":{"totDom":548,"totIntl":18,"rows":[{"l":"Ravi Newkirk","dom":215,"intl":0},{"l":"Thomas Whitfield","dom":107,"intl":0},{"l":"Melissa Gardner","dom":48,"intl":0},{"l":"Layla Vaughn","dom":18,"intl":3},{"l":"Jacob Kensington","dom":19,"intl":0},{"l":"Ravi Parrish","dom":18,"intl":0},{"l":"Susan Monroe","dom":14,"intl":3},{"l":"Deborah Wexford","dom":14,"intl":0},{"l":"Deborah Osborne","dom":14,"intl":0},{"l":"Yusuf Yates","dom":12,"intl":0},{"l":"Betty Rowland","dom":9,"intl":0},{"l":"Nadia Delacroix","dom":8,"intl":0},{"l":"Gary Dawson","dom":8,"intl":0},{"l":"Hassan Radcliffe","dom":1,"intl":6},{"l":"Timothy Donovan","dom":2,"intl":4},{"l":"Michelle Anderson","dom":6,"intl":0},{"l":"Hassan Larkin","dom":4,"intl":1},{"l":"Sofia Griffith","dom":5,"intl":0},{"l":"David Oakley","dom":4,"intl":0},{"l":"Daniel Jansen","dom":4,"intl":0},{"l":"Robert Underwood","dom":4,"intl":0},{"l":"Carol Ashford","dom":3,"intl":0},{"l":"Rohan Sutton","dom":3,"intl":0},{"l":"Susan Whitfield","dom":2,"intl":1},{"l":"Donna Zimmerman","dom":2,"intl":0},{"l":"Eric Ibsen","dom":2,"intl":0},{"l":"Marcus Wexford","dom":1,"intl":0}]},"mar":{"totDom":576,"totIntl":14,"rows":[{"l":"Ravi Newkirk","dom":189,"intl":1},{"l":"Thomas Whitfield","dom":135,"intl":0},{"l":"Melissa Gardner","dom":49,"intl":2},{"l":"Susan Monroe","dom":30,"intl":1},{"l":"Ravi Parrish","dom":27,"intl":1},{"l":"Jacob Kensington","dom":19,"intl":0},{"l":"Deborah Wexford","dom":13,"intl":5},{"l":"Michelle Anderson","dom":15,"intl":0},{"l":"Gary Dawson","dom":14,"intl":0},{"l":"Layla Vaughn","dom":11,"intl":2},{"l":"Yusuf Yates","dom":12,"intl":0},{"l":"Daniel Jansen","dom":11,"intl":0},{"l":"Hassan Larkin","dom":6,"intl":0},{"l":"Nadia Delacroix","dom":6,"intl":0},{"l":"Susan Whitfield","dom":6,"intl":0},{"l":"Betty Rowland","dom":6,"intl":0},{"l":"Deborah Osborne","dom":5,"intl":0},{"l":"Timothy Donovan","dom":2,"intl":2},{"l":"Robert Underwood","dom":4,"intl":0},{"l":"Marcus Wexford","dom":4,"intl":0},{"l":"Sofia Griffith","dom":2,"intl":0},{"l":"Carol Ashford","dom":2,"intl":0},{"l":"David Oakley","dom":2,"intl":0},{"l":"Margaret Grayson","dom":1,"intl":0},{"l":"Rohan Sutton","dom":1,"intl":0},{"l":"Donna Zimmerman","dom":1,"intl":0},{"l":"Hassan Radcliffe","dom":1,"intl":0}]},"apr":{"totDom":665,"totIntl":13,"rows":[{"l":"Ravi Newkirk","dom":195,"intl":0},{"l":"Thomas Whitfield","dom":115,"intl":0},{"l":"Melissa Gardner","dom":61,"intl":0},{"l":"Michelle Anderson","dom":37,"intl":0},{"l":"Jacob Kensington","dom":30,"intl":0},{"l":"Ravi Parrish","dom":27,"intl":1},{"l":"Susan Monroe","dom":20,"intl":0},{"l":"Layla Vaughn","dom":17,"intl":2},{"l":"Daniel Jansen","dom":13,"intl":3},{"l":"Nadia Delacroix","dom":14,"intl":0},{"l":"Gary Dawson","dom":13,"intl":0},{"l":"Deborah Osborne","dom":13,"intl":0},{"l":"Robert Underwood","dom":13,"intl":0},{"l":"Susan Whitfield","dom":12,"intl":0},{"l":"Carol Ashford","dom":12,"intl":0},{"l":"Betty Rowland","dom":12,"intl":0},{"l":"Timothy Donovan","dom":2,"intl":7},{"l":"Yusuf Yates","dom":7,"intl":0},{"l":"Marcus Wexford","dom":7,"intl":0},{"l":"David Oakley","dom":7,"intl":0},{"l":"Rohan Sutton","dom":7,"intl":0},{"l":"Sofia Griffith","dom":7,"intl":0},{"l":"Deborah Wexford","dom":5,"intl":0},{"l":"Neha Parrish","dom":5,"intl":0},{"l":"Hassan Larkin","dom":4,"intl":0},{"l":"Hassan Radcliffe","dom":2,"intl":0},{"l":"Marcus Sheridan","dom":2,"intl":0},{"l":"Donna Zimmerman","dom":2,"intl":0},{"l":"Meera Ingram","dom":2,"intl":0},{"l":"Eric Ibsen","dom":1,"intl":0}]},"may":{"totDom":687,"totIntl":30,"rows":[{"l":"Ravi Newkirk","dom":249,"intl":0},{"l":"Thomas Whitfield","dom":101,"intl":1},{"l":"Melissa Gardner","dom":51,"intl":2},{"l":"Susan Monroe","dom":34,"intl":10},{"l":"Jacob Kensington","dom":42,"intl":0},{"l":"Deborah Wexford","dom":23,"intl":4},{"l":"Ravi Parrish","dom":25,"intl":2},{"l":"Gary Dawson","dom":21,"intl":0},{"l":"Deborah Osborne","dom":18,"intl":0},{"l":"Hassan Larkin","dom":10,"intl":7},{"l":"Daniel Jansen","dom":13,"intl":1},{"l":"Yusuf Yates","dom":13,"intl":0},{"l":"Betty Rowland","dom":11,"intl":0},{"l":"Michelle Anderson","dom":10,"intl":0},{"l":"Nadia Delacroix","dom":9,"intl":0},{"l":"David Oakley","dom":8,"intl":0},{"l":"Sofia Griffith","dom":7,"intl":0},{"l":"Marcus Wexford","dom":7,"intl":0},{"l":"Robert Underwood","dom":6,"intl":0},{"l":"Carol Ashford","dom":5,"intl":0},{"l":"Neha Parrish","dom":5,"intl":0},{"l":"Donna Zimmerman","dom":4,"intl":0},{"l":"Susan Whitfield","dom":4,"intl":0},{"l":"Layla Vaughn","dom":4,"intl":0},{"l":"Timothy Donovan","dom":0,"intl":3},{"l":"Rohan Sutton","dom":2,"intl":0},{"l":"Marcus Sheridan","dom":1,"intl":0},{"l":"Eric Ibsen","dom":1,"intl":0}]},"jun":{"totDom":726,"totIntl":19,"rows":[{"l":"Ravi Newkirk","dom":296,"intl":0},{"l":"Thomas Whitfield","dom":147,"intl":0},{"l":"Melissa Gardner","dom":38,"intl":0},{"l":"Jacob Kensington","dom":32,"intl":0},{"l":"Susan Monroe","dom":23,"intl":6},{"l":"Ravi Parrish","dom":25,"intl":1},{"l":"Gary Dawson","dom":20,"intl":0},{"l":"Layla Vaughn","dom":15,"intl":3},{"l":"Deborah Wexford","dom":14,"intl":2},{"l":"Daniel Jansen","dom":15,"intl":0},{"l":"Deborah Osborne","dom":14,"intl":0},{"l":"Michelle Anderson","dom":12,"intl":0},{"l":"Betty Rowland","dom":12,"intl":0},{"l":"Rohan Sutton","dom":5,"intl":6},{"l":"Donna Zimmerman","dom":8,"intl":0},{"l":"Sofia Griffith","dom":8,"intl":0},{"l":"Hassan Larkin","dom":7,"intl":0},{"l":"Yusuf Yates","dom":6,"intl":0},{"l":"Robert Underwood","dom":5,"intl":0},{"l":"David Oakley","dom":5,"intl":0},{"l":"Eric Ibsen","dom":4,"intl":0},{"l":"Susan Whitfield","dom":4,"intl":0},{"l":"Carol Ashford","dom":4,"intl":0},{"l":"Marcus Sheridan","dom":2,"intl":0},{"l":"Marcus Wexford","dom":2,"intl":0},{"l":"Neha Parrish","dom":2,"intl":0},{"l":"Hassan Radcliffe","dom":0,"intl":1},{"l":"Timothy Donovan","dom":1,"intl":0}]},"jul":{"totDom":859,"totIntl":34,"rows":[{"l":"Ravi Newkirk","dom":308,"intl":0},{"l":"Melissa Gardner","dom":100,"intl":9},{"l":"Thomas Whitfield","dom":107,"intl":0},{"l":"Jacob Kensington","dom":42,"intl":2},{"l":"Ravi Parrish","dom":42,"intl":1},{"l":"Gary Dawson","dom":34,"intl":0},{"l":"Deborah Wexford","dom":23,"intl":11},{"l":"Deborah Osborne","dom":21,"intl":0},{"l":"Layla Vaughn","dom":18,"intl":0},{"l":"Rohan Sutton","dom":14,"intl":1},{"l":"Daniel Jansen","dom":14,"intl":1},{"l":"David Oakley","dom":12,"intl":1},{"l":"Michelle Anderson","dom":12,"intl":0},{"l":"Timothy Donovan","dom":8,"intl":3},{"l":"Hassan Larkin","dom":10,"intl":1},{"l":"Susan Monroe","dom":9,"intl":2},{"l":"Neha Parrish","dom":10,"intl":0},{"l":"Marcus Wexford","dom":10,"intl":0},{"l":"Nadia Delacroix","dom":10,"intl":0},{"l":"Robert Underwood","dom":9,"intl":0},{"l":"Eric Ibsen","dom":8,"intl":0},{"l":"Sofia Griffith","dom":8,"intl":0},{"l":"Carol Ashford","dom":6,"intl":0},{"l":"Yusuf Yates","dom":6,"intl":0},{"l":"Betty Rowland","dom":6,"intl":0},{"l":"Meera Ingram","dom":2,"intl":2},{"l":"Donna Zimmerman","dom":2,"intl":0},{"l":"Susan Whitfield","dom":2,"intl":0},{"l":"Marcus Sheridan","dom":1,"intl":0},{"l":"Hassan Radcliffe","dom":1,"intl":0}]},"q1":{"totDom":1676,"totIntl":53,"rows":[{"l":"Ravi Newkirk","dom":584,"intl":2},{"l":"Thomas Whitfield","dom":332,"intl":0},{"l":"Melissa Gardner","dom":154,"intl":5},{"l":"Susan Monroe","dom":64,"intl":5},{"l":"Jacob Kensington","dom":64,"intl":3},{"l":"Ravi Parrish","dom":60,"intl":2},{"l":"Deborah Wexford","dom":44,"intl":5},{"l":"Gary Dawson","dom":44,"intl":0},{"l":"Layla Vaughn","dom":29,"intl":7},{"l":"Michelle Anderson","dom":35,"intl":0},{"l":"Yusuf Yates","dom":28,"intl":0},{"l":"Daniel Jansen","dom":24,"intl":2},{"l":"Timothy Donovan","dom":13,"intl":11},{"l":"Nadia Delacroix","dom":24,"intl":0},{"l":"Deborah Osborne","dom":24,"intl":0},{"l":"Betty Rowland","dom":21,"intl":0},{"l":"Carol Ashford","dom":19,"intl":0},{"l":"Susan Whitfield","dom":16,"intl":1},{"l":"David Oakley","dom":15,"intl":1},{"l":"Rohan Sutton","dom":15,"intl":0},{"l":"Hassan Larkin","dom":13,"intl":2},{"l":"Robert Underwood","dom":11,"intl":0},{"l":"Marcus Wexford","dom":10,"intl":0},{"l":"Sofia Griffith","dom":9,"intl":0},{"l":"Hassan Radcliffe","dom":2,"intl":6},{"l":"Margaret Grayson","dom":4,"intl":1},{"l":"Donna Zimmerman","dom":5,"intl":0},{"l":"Paul Larkin","dom":4,"intl":0},{"l":"Marcus Sheridan","dom":2,"intl":0},{"l":"Eric Ibsen","dom":2,"intl":0},{"l":"CEO","dom":1,"intl":0},{"l":"Neha Parrish","dom":1,"intl":0}]},"q2":{"totDom":2078,"totIntl":62,"rows":[{"l":"Ravi Newkirk","dom":740,"intl":0},{"l":"Thomas Whitfield","dom":363,"intl":1},{"l":"Melissa Gardner","dom":150,"intl":2},{"l":"Jacob Kensington","dom":104,"intl":0},{"l":"Susan Monroe","dom":77,"intl":16},{"l":"Ravi Parrish","dom":77,"intl":4},{"l":"Michelle Anderson","dom":59,"intl":0},{"l":"Gary Dawson","dom":54,"intl":0},{"l":"Deborah Wexford","dom":42,"intl":6},{"l":"Deborah Osborne","dom":45,"intl":0},{"l":"Daniel Jansen","dom":41,"intl":4},{"l":"Layla Vaughn","dom":36,"intl":5},{"l":"Betty Rowland","dom":35,"intl":0},{"l":"Hassan Larkin","dom":21,"intl":7},{"l":"Yusuf Yates","dom":26,"intl":0},{"l":"Robert Underwood","dom":24,"intl":0},{"l":"Nadia Delacroix","dom":23,"intl":0},{"l":"Sofia Griffith","dom":22,"intl":0},{"l":"Carol Ashford","dom":21,"intl":0},{"l":"Susan Whitfield","dom":20,"intl":0},{"l":"David Oakley","dom":20,"intl":0},{"l":"Rohan Sutton","dom":14,"intl":6},{"l":"Marcus Wexford","dom":16,"intl":0},{"l":"Donna Zimmerman","dom":14,"intl":0},{"l":"Timothy Donovan","dom":3,"intl":10},{"l":"Neha Parrish","dom":12,"intl":0},{"l":"Eric Ibsen","dom":6,"intl":0},{"l":"Marcus Sheridan","dom":5,"intl":0},{"l":"Hassan Radcliffe","dom":2,"intl":1},{"l":"Meera Ingram","dom":2,"intl":0}]},"ytd":{"totDom":4613,"totIntl":149,"rows":[{"l":"Ravi Newkirk","dom":1632,"intl":2},{"l":"Thomas Whitfield","dom":802,"intl":1},{"l":"Melissa Gardner","dom":404,"intl":16},{"l":"Jacob Kensington","dom":210,"intl":5},{"l":"Ravi Parrish","dom":179,"intl":7},{"l":"Susan Monroe","dom":150,"intl":23},{"l":"Gary Dawson","dom":132,"intl":0},{"l":"Deborah Wexford","dom":109,"intl":22},{"l":"Michelle Anderson","dom":106,"intl":0},{"l":"Layla Vaughn","dom":83,"intl":12},{"l":"Deborah Osborne","dom":90,"intl":0},{"l":"Daniel Jansen","dom":79,"intl":7},{"l":"Betty Rowland","dom":62,"intl":0},{"l":"Yusuf Yates","dom":60,"intl":0},{"l":"Nadia Delacroix","dom":57,"intl":0},{"l":"Hassan Larkin","dom":44,"intl":10},{"l":"Rohan Sutton","dom":43,"intl":7},{"l":"David Oakley","dom":47,"intl":2},{"l":"Timothy Donovan","dom":24,"intl":24},{"l":"Carol Ashford","dom":46,"intl":0},{"l":"Robert Underwood","dom":44,"intl":0},{"l":"Susan Whitfield","dom":38,"intl":1},{"l":"Sofia Griffith","dom":39,"intl":0},{"l":"Marcus Wexford","dom":36,"intl":0},{"l":"Neha Parrish","dom":23,"intl":0},{"l":"Donna Zimmerman","dom":21,"intl":0},{"l":"Eric Ibsen","dom":16,"intl":0},{"l":"Hassan Radcliffe","dom":5,"intl":7},{"l":"Marcus Sheridan","dom":8,"intl":0},{"l":"Meera Ingram","dom":4,"intl":2},{"l":"Margaret Grayson","dom":4,"intl":1},{"l":"Paul Larkin","dom":4,"intl":0},{"l":"CEO","dom":1,"intl":0}]}};
+
+// ═══════════════════════
+// HELPERS
+// ═══════════════════════
+const $ = id => document.getElementById(id);
+const fmtN = n => '$'+Math.abs(n).toLocaleString(undefined,{maximumFractionDigits:0});
+const fmtK = n => '$'+Math.round(Math.abs(n)/1000).toLocaleString()+'K';
+const fmtP = n => (n>=0?'+':'')+n.toFixed(1)+'%';
+const fmt  = n => n<0?'('+fmtN(Math.abs(n))+')':fmtN(n);
+
+const MGR_TEAMS = {"Rohan Sutton":["Rohan Sutton"],"Jacob Kensington":["Jacob Kensington"],"Sofia Griffith":["Sofia Griffith"],"Meera Ingram":["Meera Ingram"],"CEO":["BTL- Corp","Corporate Leader","Joshua Thackeray","Joshua Upton","Sandra Ivory","Layla Mercer"],"Corporate Adjustments":["Corporate Adjustments"],"Marcus Wexford":["Marcus Wexford"],"Thomas Whitfield":["Thomas Whitfield"],"Susan Monroe":["Susan Monroe"],"Ravi Parrish":["Ravi Parrish"],"Ravi Newkirk":["Ravi Newkirk"],"Deborah Wexford":["Deborah Wexford"],"Paul Larkin":["Paul Larkin"],"Michelle Anderson":["Michelle Anderson"],"Edward Holloway":["Edward Holloway"],"Hassan Larkin":["Hassan Larkin"],"Sanjay Bennett":["Mark Vaughn","Sanjay Bennett"],"Melissa Gardner":["Ashley Nolan","Kavita Larkin","Michael Thackeray","Deborah Newkirk","Melissa Gardner"],"Yusuf Yates":["Yusuf Yates"],"Susan Whitfield":["Susan Whitfield"],"Gary Dawson":["Gary Dawson"],"Carol Ashford":["Carol Ashford"],"Timothy Donovan":["Karen Oakley"],"Margaret Grayson":["Stephen Delacroix","Margaret Grayson"],"Donna Rowland":["Donna Rowland"],"Gary Delacroix":["Gary Delacroix"],"Ronald Vaughn":["Ronald Vaughn"],"Margaret Larkin":["Margaret Larkin"]};
+
+// ═══════════════════════
+// FILTER STATE
+// ═══════════════════════
+let period='ytd', tier='ytd', activeMonth='jun', activeQuarter='q1';
+let allLdrData=[], sortDirs={}, catCI=null, mgrCI=null, compCI=null, splitCI=null;
+
+const MONTH_META={
+  jan:{v:'MTD',p:'Jan 2026',r:'Jan 1 – Jan 31, 2026'},
+  feb:{v:'MTD',p:'Feb 2026',r:'Feb 1 – Feb 28, 2026'},
+  mar:{v:'MTD',p:'Mar 2026',r:'Mar 1 – Mar 31, 2026'},
+  apr:{v:'MTD',p:'Apr 2026',r:'Apr 1 – Apr 30, 2026'},
+  may:{v:'MTD',p:'May 2026',r:'May 1 – May 31, 2026'},
+  jun:{v:'MTD',p:'Jun 2026',r:'Jun 1 – Jun 30, 2026'},
+  jul:{v:'MTD',p:'Jul 2026',r:'Jul 1 – Jul 31, 2026'},
+};
+
+function setTier(t){
+  tier=t;
+  ['mtd','ytd','qtd'].forEach(k=>{const el=$('s-'+k);if(el)el.classList.toggle('on',k===t);});
+  $('month-grp').classList.toggle('show',t==='mtd');
+  $('quarter-grp').classList.toggle('show',t==='qtd');
+  if(t==='mtd'){period=activeMonth;const m=MONTH_META[activeMonth];updateBC(m.v,m.p,m.r);}
+  else if(t==='ytd'){period='ytd';updateBC('YTD','YTD 2026','Jan 1 – Jul 31, 2026');}
+  else{period=activeQuarter;const meta={q1:['Q1 2026','Jan 1 – Mar 31, 2026'],q2:['Q2 2026 (Apr–Jun)','Apr 1 – Jun 30, 2026']};updateBC('QTD',meta[activeQuarter][0],meta[activeQuarter][1]);}
+  refresh();
+}
+function setMonth(m){
+  activeMonth=m;
+  ['jan','feb','mar','apr','may','jun','jul'].forEach(k=>{const el=$('s-'+k);if(el)el.classList.toggle('on',k===m);});
+  period=m;const mt=MONTH_META[m];updateBC(mt.v,mt.p,mt.r);refresh();
+}
+function setQuarter(q){
+  activeQuarter=q;period=q;
+  ['q1','q2'].forEach(k=>{const el=$('s-'+k);if(el)el.classList.toggle('on',k===q);});
+  const meta={q1:['Q1 2026','Jan 1 – Mar 31, 2026'],q2:['Q2 2026 (Apr–Jun)','Apr 1 – Jun 30, 2026']};
+  updateBC('QTD',meta[q][0],meta[q][1]);refresh();
+}
+function updateBC(v,p,r){$('bc-v').textContent=v;$('bc-p').textContent=p;$('bc-r').textContent=r;}
+
+// ═══════════════════════
+// REFRESH
+// ═══════════════════════
+function refresh(){
+  const d=PERIODS_2026[period]; if(!d)return;
+  $('sc-sub').textContent=d.label+' · '+d.desc;
+  if($('cat-lbl'))$('cat-lbl').textContent=d.label;
+  if($('comp-lbl'))$('comp-lbl').textContent=d.label;
+  if($('travel-lbl'))$('travel-lbl').textContent=d.label;
+  renderScorecard(d); renderCatChart(d); renderLdrChart(d);
+  renderLdrTables(d); renderCompChart(); renderCompTable(); renderTravelSplit();
+}
+
+// ═══════════════════════
+// SCORECARD
+// ═══════════════════════
+// ═══════════════════════
+// INSIGHT STRIP — derived from the data so MTD, QTD and YTD are all populated
+// ═══════════════════════
+const CLBL={"c": "airfare booked outside Concur", "p": "pre-approval not obtained", "s": "expenses submitted more than 30 days late", "cc": "expenses not paid on the corporate card", "m": "average lunch & dinner cost per attendee exceeded", "im": "internal meal cost / travel per diem exceeded", "a": "trips not booked far enough in advance"};
+function buildInsights(d,overC,underC){
+  const ta=d.totalActual,tb=d.totalBudget,tv=tb-ta,vp=tb>0?Math.abs(tv/tb*100):0;
+  const out=[];
+  const pc=n=>n.toFixed(1)+'%';
+
+  // 1 — headline
+  out.push('<strong>'+d.label+':</strong> '+fmtN(ta)+' actual vs. '+fmtN(tb)+' budget — '+
+    (tv>=0 ? fmtN(tv)+' ('+pc(vp)+') remaining of the budget allocated'
+           : fmtN(Math.abs(tv))+' ('+pc(vp)+') beyond the budget allocated'));
+
+  // 2 — leader split, with the GAAP row separated so it cannot read as operational overspend
+  const ops=d.leaders.filter(r=>r.l!=='Corporate Adjustments'&&r.l!=='Others');
+  const worst=ops.reduce((b,r)=>(r.a-r.b)>(b.a-b.b)?r:b,ops[0]);
+  const corp=d.leaders.find(r=>r.l==='Corporate Adjustments');
+  let s2='<strong>'+overC+' of '+ops.length+' ops leaders over budget</strong>, '+underC+' under. '+
+    'Largest operational overage: '+worst.l+' at '+fmtN(worst.a-worst.b)+' above plan';
+  if(corp&&corp.a>0) s2+='; Corporate Adjustments adds '+fmtN(corp.a)+' more against no budget';
+  out.push(s2);
+
+  // 3 — category driver
+  const cm={};d.categories.forEach(c=>cm[c.cat]=c);
+  const g=k=>cm[k]||{a:0,b:0};
+  const ML=['Employee Travel Meals','Meals - Employee Non-Travel Meals','Client Meals'];
+  const cats=[{l:'Lodging',a:g('Lodging').a,b:g('Lodging').b},
+              {l:'Transportation',a:g('Transportation').a,b:g('Transportation').b},
+              {l:'Meals',a:ML.reduce((s,k)=>s+g(k).a,0),b:ML.reduce((s,k)=>s+g(k).b,0)},
+              {l:'Other Travel',a:g('Other Travel').a,b:g('Other Travel').b}];
+  const wc=cats.reduce((b,c)=>(c.a-c.b)>(b.a-b.b)?c:b,cats[0]);
+  out.push(wc.a>wc.b
+    ? '<strong>'+wc.l+'</strong> is the largest category variance — '+fmtN(wc.a)+' against a '+
+      fmtN(wc.b)+' budget, '+fmtN(wc.a-wc.b)+' over'+(wc.b>0?' ('+(wc.a/wc.b*100).toFixed(0)+'% of plan)':'')
+    : '<strong>All four spend categories are within budget</strong> for this period');
+
+  // 4 — compliance
+  const cr=COMP_2026[period]||[];
+  const tot={};Object.keys(CLBL).forEach(k=>tot[k]=cr.reduce((s,r)=>s+(r[k]||0),0));
+  const ex=Object.keys(tot).reduce((s,k)=>s+tot[k],0);
+  if(ex>0){
+    const top=Object.keys(tot).reduce((a,b)=>tot[a]>=tot[b]?a:b);
+    const hi=cr.slice().sort((a,b)=>cScore(b)-cScore(a))[0];
+    out.push('<strong>'+ex.toLocaleString()+' compliance exceptions</strong> across '+cr.length+
+      ' leaders — '+(tot[top]/ex*100).toFixed(0)+'% are '+CLBL[top]+
+      (hi?'; highest weighted risk sits with '+hi.l:''));
+  } else out.push('<strong>No compliance exceptions recorded</strong> for this period');
+
+  // 5 — travel volume
+  const td=TRAVEL_2026[period];
+  if(td){
+    const n=td.totDom+td.totIntl;
+    const busy=td.rows.reduce((b,r)=>(r.dom+r.intl)>(b.dom+b.intl)?r:b,td.rows[0]);
+    out.push('<strong>'+n.toLocaleString()+' trips booked</strong> — '+td.totDom.toLocaleString()+
+      ' domestic, '+td.totIntl.toLocaleString()+' international ('+
+      (n>0?(td.totIntl/n*100).toFixed(1):'0.0')+'% of volume); busiest team: '+busy.l+
+      ' with '+(busy.dom+busy.intl).toLocaleString());
+  }
+
+  return '<div class="istrip">'+out.map(i=>'<div class="ipill"><span class="dot">▸</span>'+i+'</div>').join('')+'</div>';
+}
+
+function renderScorecard(d){
+  const ta=d.totalActual,tb=d.totalBudget,tv=tb-ta,vp=tb>0?(tv/tb*100):0,pos=tv>=0;
+  // zero-budget leaders were dropped from BOTH filters, so MTD showed 21/22/23.
+  const overC=d.leaders.filter(r=>r.l!=='Others'&&r.a>r.b).length;
+  const underC=d.leaders.filter(r=>r.l!=='Others'&&r.a<=r.b).length;
+  const cm={};d.categories.forEach(c=>cm[c.cat]=c);
+  const g=k=>cm[k]||{a:0,b:0};
+  const mealA=g('Employee Travel Meals').a+g('Meals - Employee Non-Travel Meals').a+g('Client Meals').a;
+  const mealB=g('Employee Travel Meals').b+g('Meals - Employee Non-Travel Meals').b+g('Client Meals').b;
+  const kpis=[
+    {icon:'🏨',lbl:'Lodging',    a:g('Lodging').a,       b:g('Lodging').b,       cls:'blue'},
+    {icon:'✈️',lbl:'Transport',  a:g('Transportation').a,b:g('Transportation').b, cls:'rose'},
+    {icon:'🍽️',lbl:'All Meals',  a:mealA,               b:mealB,               cls:'emerald'},
+    {icon:'📋',lbl:'Other Travel',a:g('Other Travel').a, b:g('Other Travel').b,  cls:'amber'},
+  ];
+  const hc=$('hc-var');
+  if(hc)hc.textContent=(pos?fmtN(tv)+' Under Budget':fmtN(Math.abs(tv))+' Beyond Budget YTD');
+  let html=`<div class="sc-grid"><div class="hero">
+    <div class="h-ey">Group Total — ${d.label}</div>
+    <div class="h-amt">${fmtN(ta)}</div>
+    <div class="h-bud">Budget: ${fmtN(tb)}</div>
+    <div class="h-var ${pos?'hv-pos':'hv-neg'}">${pos?'▼ '+fmtN(tv)+' ('+Math.abs(vp).toFixed(1)+'%) remaining of budget allocated':'▲ '+fmtN(Math.abs(tv))+' ('+Math.abs(vp).toFixed(1)+'%) beyond the budget allocated'}</div>
+    <div class="h-stats">
+      <div><div class="hst-val">${overC}</div><div class="hst-lbl">Leaders Over Budget</div></div>
+      <div><div class="hst-val">${underC}</div><div class="hst-lbl">Leaders Under Budget</div></div>
+    </div></div>`;
+  kpis.forEach(k=>{
+    const v=k.b-k.a,p2=v>=0,fill=Math.min(100,k.b>0?(k.a/k.b*100):100);
+    html+=`<div class="kpi kpi-${k.cls}"><div class="kpi-top"><div class="kpi-icon">${k.icon}</div><div class="kpi-lbl">${k.lbl}</div></div>
+      <div class="kpi-val">${fmtK(k.a)}</div><div class="kpi-bud">Budget: ${fmtK(Math.max(k.b,0))}</div>
+      <div class="kpi-vr ${p2?'kv-pos':'kv-neg'}">${p2?'▼ '+fmtN(v)+' remaining':'▲ '+fmtN(Math.abs(v))+' over'}</div>
+      <div class="pbar"><div class="pbar-fill" style="width:${fill}%;background:${p2?'#059669':'#dc2626'};"></div></div></div>`;
+  });
+  html+='</div>';
+
+  html+=buildInsights(d,overC,underC);
+  $('scorecard-content').innerHTML=html;
+}
+
+// ═══════════════════════
+// CATEGORY CHART
+// ═══════════════════════
+function renderCatChart(d){
+  const cats=d.categories.filter(c=>c.a!==0||c.b!==0);
+  if(catCI){catCI.destroy();catCI=null;}
+  catCI=new Chart($('catChart'),{type:'bar',data:{labels:cats.map(c=>c.cat),datasets:[
+    {label:'Actual',data:cats.map(c=>c.a),backgroundColor:cats.map(c=>c.a>c.b&&c.b>0?'#dc2626':'#1e5fcc'),borderRadius:5,borderSkipped:false},
+    {label:'Budget',data:cats.map(c=>Math.max(c.b,0)),backgroundColor:'rgba(203,213,225,0.7)',borderRadius:5,borderSkipped:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{callbacks:{afterBody:(items)=>{
+    const i=items[0].dataIndex,c=cats[i],v=c.b-c.a;
+    return[`Budget − Actual: ${v>=0?'+':''}${fmtN(v)} (${v>=0?'Under Budget':'Over Budget'})`];
+  }}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},maxRotation:35}},
+    y:{ticks:{callback:v=>'$'+Math.round(v/1000).toLocaleString()+'K'},grid:{color:'#f1f5f9'},title:{display:true,text:'Amount ($)'}}}}});
+  const ta=cats.reduce((s,c)=>s+c.a,0),tb=cats.reduce((s,c)=>s+c.b,0),tv=tb-ta;
+  $('cat-tbody').innerHTML=cats.map(c=>{const v=c.b-c.a,pos=v>=0;
+    return`<tr><td>${c.cat}${c.b<0?' <span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 4px;border-radius:3px;">neg.budget</span>':''}</td>
+      <td class="mono">${c.b<0?'('+fmtN(Math.abs(c.b))+')':fmtN(c.b)}</td><td class="mono">${fmtN(c.a)}</td>
+      <td class="mono ${pos?'pos':'neg'}">${pos?'+'+fmtN(v):fmt(v)} <span style="font-size:10px;">(${pos?'Under Budget':'Over Budget'})</span></td></tr>`;
+  }).join('');
+  $('cat-tfoot').innerHTML=`<tr><td><strong>Total</strong></td><td class="mono"><strong>${fmtN(tb)}</strong></td><td class="mono"><strong>${fmtN(ta)}</strong></td>
+    <td class="mono ${tv>=0?'pos':'neg'}"><strong>${tv>=0?'+'+fmtN(tv):fmt(tv)} (${tv>=0?'Under Budget':'Over Budget'})</strong></td></tr>`;
+}
+
+// ═══════════════════════
+// LEADER CHART + TABLES
+// ═══════════════════════
+function renderLdrChart(d){
+  const rows=d.leaders;
+  if(mgrCI){mgrCI.destroy();mgrCI=null;}
+  mgrCI=new Chart($('ldrChart'),{type:'bar',data:{labels:rows.map(r=>r.l.split(' ')[0]),datasets:[
+    {label:'Actual',data:rows.map(r=>r.a),backgroundColor:rows.map(r=>r.a>r.b&&r.b>0?'#dc2626':'#1e5fcc'),borderRadius:4,borderSkipped:false},
+    {label:'Budget',data:rows.map(r=>Math.max(r.b,0)),backgroundColor:'rgba(203,213,225,0.6)',borderRadius:4,borderSkipped:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{callbacks:{afterBody:(items)=>{
+    const i=items[0].dataIndex,r=rows[i],v=r.b-r.a;return[`Budget − Actual: ${v>=0?'+':''}${fmtN(v)} (${v>=0?'Under Budget':'Over Budget'})`];
+  }}}},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}},
+    y:{ticks:{callback:v=>'$'+Math.round(v/1000).toLocaleString()+'K'},grid:{color:'#f1f5f9'}}}}});
+}
+
+function renderLdrTables(d){
+  allLdrData=d.leaders.map(r=>({...r,v:r.b-r.a,p:r.b>0?((r.b-r.a)/r.b*100):(r.a>0?-999:0),Ml:r.Ml||0}));
+  const row=r=>`<tr><td><strong>${r.l}</strong></td>
+    <td class="mono">${fmtN(r.a)}</td><td class="mono">${r.b>0?fmtN(r.b):'—'}</td>
+    <td class="mono ${r.v>=0?'pos':'neg'}">${r.v>=0?'+'+fmtN(r.v):fmt(r.v)}</td>
+    <td class="mono ${r.v>=0?'pos':'neg'}">${r.b>0?fmtP(r.p):'N/A'}</td></tr>`;
+  $('tbl-over').innerHTML=[...allLdrData].filter(r=>r.l!=='Others').sort((a,b)=>a.v-b.v).slice(0,5).map(row).join('');
+  $('tbl-under').innerHTML=[...allLdrData].filter(r=>r.l!=='Others').sort((a,b)=>b.v-a.v).slice(0,5).map(row).join('');
+  renderAllTable(allLdrData);
+}
+function renderAllTable(data){
+  const tA=data.reduce((s,r)=>s+r.a,0);
+  const tB=data.reduce((s,r)=>s+r.b,0);
+  const tV=tB-tA;
+
+  if($('tbl-all')){
+    $('tbl-all').innerHTML=data.map(r=>{
+      const v=r.b-r.a; const pos=v>=0;
+      const vp=r.b>0?v/r.b*100:0;
+      return `<tr>
+        <td><strong>${r.l}</strong></td>
+        <td class="mono">${fmtN(r.a)}</td>
+        <td class="mono">${r.b>0?fmtN(r.b):'—'}</td>
+        <td class="mono ${pos?'pos':'neg'}">${pos?'+'+fmtN(v):fmt(v)}</td>
+        <td class="mono ${pos?'pos':'neg'}">${r.b>0?fmtP(vp):'—'}</td>
+        <td class="mono">${fmtN(r.Lo)}</td>
+        <td class="mono">${fmtN(r.Tr)}</td>
+        <td class="mono">${fmtN(r.Ml)}</td>
+        <td class="mono">${fmtN(r.OT)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  const vP=tV>=0;
+  if($('tbl-foot')){
+    $('tbl-foot').innerHTML=`<tr>
+      <td><strong>Total — ${data.length} Ops Leaders</strong></td>
+      <td class="mono"><strong>${fmtN(tA)}</strong></td>
+      <td class="mono"><strong>${fmtN(tB)}</strong></td>
+      <td class="mono ${vP?'pos':'neg'}"><strong>${vP?'+'+fmtN(tV):fmt(tV)}</strong></td>
+      <td class="mono ${vP?'pos':'neg'}"><strong>${tB>0?fmtP(tV/tB*100):'—'}</strong></td>
+      <td class="mono"><strong>${fmtN(data.reduce((s,r)=>s+r.Lo,0))}</strong></td>
+      <td class="mono"><strong>${fmtN(data.reduce((s,r)=>s+r.Tr,0))}</strong></td>
+      <td class="mono"><strong>${fmtN(data.reduce((s,r)=>s+r.Ml,0))}</strong></td>
+      <td class="mono"><strong>${fmtN(data.reduce((s,r)=>s+r.OT,0))}</strong></td>
+    </tr>`;
+  }
+}
+
+
+function toggleSub(i){
+  const row=document.getElementById('subrow-'+i);
+  const btn=document.getElementById('expbtn-'+i);
+  if(!row||!btn)return;
+  const isOpen=row.classList.toggle('open');
+  btn.classList.toggle('active',isOpen);
+  btn.textContent=isOpen?'×':'+';
+}
+
+function sortL(f){
+  sortDirs[f]=sortDirs[f]===1?-1:1;const dir=sortDirs[f];
+  renderAllTable([...allLdrData].sort((a,b)=>f==='l'?a.l.localeCompare(b.l)*dir:((a[f]||0)-(b[f]||0))*dir));
+}
+
+// ═══════════════════════
+// COMPLIANCE
+// ═══════════════════════
+function renderCompChart(){
+  const rows=(COMP_2026[period]||[]).slice().sort((a,b)=>cScore(b)-cScore(a)).slice(0,12);
+  if($('comp-lbl'))$('comp-lbl').textContent=(PERIODS_2026[period]||{}).label||'YTD';
+  if(compCI){compCI.destroy();compCI=null;}
+  compCI=new Chart($('compChart'),{type:'bar',data:{labels:rows.map(r=>r.l.split(' ')[0]),datasets:[
+    {label:'Expense Submitted Late >30 Days (1pt)',      data:rows.map(r=>r.s),    backgroundColor:'#dc2626',borderRadius:2},
+    {label:'Not Paid with Corporate Card (2pt)',         data:rows.map(r=>r.cc*2), backgroundColor:'#f59e0b',borderRadius:2},
+    {label:'Trip Not Booked in Advance (1pt)',           data:rows.map(r=>r.a),    backgroundColor:'#7c3aed',borderRadius:2},
+    {label:'Pre-Approval Not Obtained (3pt)',            data:rows.map(r=>r.p*3),  backgroundColor:'#ca8a04',borderRadius:2},
+    {label:'Airfare Not Booked in Concur (3pt)',         data:rows.map(r=>r.c*3),  backgroundColor:'#1e5fcc',borderRadius:2},
+    {label:'Avg/Internal Meal Cost Exceeded (1pt)',      data:rows.map(r=>r.m+r.im),backgroundColor:'#64748b',borderRadius:2},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{mode:'index',intersect:false}},
+    scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11}}},y:{stacked:true,title:{display:true,text:'Weighted Score'},grid:{color:'#f1f5f9'}}}}});
+}
+const CW={c:3,p:3,s:1,cc:2,m:1,im:1,a:1};
+const cScore=r=>Object.keys(CW).reduce((t,k)=>t+(r[k]||0)*CW[k],0);
+function renderCompTable(){
+  const rows=(COMP_2026[period]||[]).slice().sort((a,b)=>cScore(b)-cScore(a));
+  $('comp-tbody').innerHTML=rows.map(r=>{
+    const lvl=r.score>400?['b-red','High']:r.score>100?['b-amber','Medium']:['b-green','Low'];
+    return`<tr><td><strong>${r.l}</strong></td>
+      <td class="mono">${r.c||'—'}</td><td class="mono">${r.p||'—'}</td><td class="mono">${r.s||'—'}</td>
+      <td class="mono">${r.cc||'—'}</td><td class="mono">${r.m||'—'}</td><td class="mono">${r.im||'—'}</td>
+      <td class="mono">${r.a||'—'}</td><td class="mono"><strong>${r.score}</strong></td>
+      <td><span class="badge ${lvl[0]}">${lvl[1]}</span></td></tr>`;
+  }).join('');
+  const t={c:0,p:0,s:0,cc:0,m:0,im:0,a:0,sc:0};
+  rows.forEach(r=>{t.c+=r.c;t.p+=r.p;t.s+=r.s;t.cc+=r.cc;t.m+=r.m;t.im+=r.im;t.a+=r.a;t.sc+=r.score;});
+  $('comp-tfoot').innerHTML=`<tr><td><strong>Total</strong></td>
+    <td class="mono"><strong>${t.c}</strong></td><td class="mono"><strong>${t.p}</strong></td>
+    <td class="mono"><strong>${t.s}</strong></td><td class="mono"><strong>${t.cc}</strong></td>
+    <td class="mono"><strong>${t.m}</strong></td><td class="mono"><strong>${t.im}</strong></td>
+    <td class="mono"><strong>${t.a}</strong></td><td class="mono"><strong>${t.sc}</strong></td><td>—</td></tr>`;
+}
+
+// ═══════════════════════
+// TRAVEL SPLIT
+// ═══════════════════════
+function renderTravelSplit(){
+  const td=TRAVEL_2026[period]||TRAVEL_2026.ytd;
+  const rows=td.rows,totD=td.totDom,totI=td.totIntl,totAll=totD+totI;
+  const upd=(a,v)=>{const el=document.querySelector(`[data-stat="${a}"]`);if(el)el.textContent=v;};
+  upd('dom',totD.toLocaleString());upd('intl',totI.toLocaleString());upd('total',totAll.toLocaleString());
+  upd('share',totAll>0?(totI/totAll*100).toFixed(1)+'%':'0.0%');
+  const top=rows[0]||{l:'—',dom:0,intl:0};
+  const highI=rows.reduce((b,r)=>r.intl>b.intl?r:b,{l:'—',intl:0});
+  upd('topldr',top.l.split(' ')[0]);upd('toptrips',(top.dom+top.intl).toLocaleString());
+  upd('intlldr',highI.intl>0?highI.l.split(' ')[0]+' ('+highI.intl+' intl)':'—');
+  const labels=rows.map(r=>r.l.split(' ')[0]);
+  const dom=rows.map(r=>r.dom),intl=rows.map(r=>r.intl);
+  if(splitCI){splitCI.destroy();splitCI=null;}
+  splitCI=new Chart($('splitChart'),{type:'bar',data:{labels,datasets:[
+    {label:'Domestic',data:dom,backgroundColor:'#1e5fcc',borderRadius:4,borderSkipped:false},
+    {label:'International',data:intl,backgroundColor:'#f59e0b',borderRadius:4,borderSkipped:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{mode:'index',intersect:false,callbacks:{afterBody:(items)=>{
+    const i=items[0].dataIndex,tot=dom[i]+intl[i];
+    return[`Total: ${tot}`,`Intl: ${tot>0?(intl[i]/tot*100).toFixed(1):0}%`];
+  }}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},maxRotation:40}},y:{title:{display:true,text:'Trip Count'},grid:{color:'#f1f5f9'}}}}});
+  if($('travel-lbl'))$('travel-lbl').textContent=(PERIODS_2026[period]||{}).label||'YTD';
+  $('travel-tbody').innerHTML=rows.map(r=>{
+    const tot=r.dom+r.intl,pct=tot>0?(r.intl/tot*100).toFixed(1):'0.0',hi=parseFloat(pct)>=20;
+    return`<tr><td><strong>${r.l}</strong></td><td class="mono">${r.dom.toLocaleString()}</td>
+      <td class="mono">${r.intl||'—'}</td><td class="mono">${tot.toLocaleString()}</td>
+      <td class="mono">${hi?`<span class="flag-intl">${pct}% ▲</span>`:pct+'%'}</td></tr>`;
+  }).join('');
+  $('travel-tfoot').innerHTML=`<tr><td><strong>Total — ${(PERIODS_2026[period]||{label:'YTD'}).label}</strong></td>
+    <td class="mono"><strong>${totD.toLocaleString()}</strong></td><td class="mono"><strong>${totI.toLocaleString()}</strong></td>
+    <td class="mono"><strong>${totAll.toLocaleString()}</strong></td>
+    <td class="mono"><strong>${totAll>0?(totI/totAll*100).toFixed(1)+'%':'0.0%'}</strong></td></tr>`;
+}
+
+// ═══════════════════════
+// STATIC CHARTS
+// ═══════════════════════
+function buildStatic(){
+  new Chart($('airClassChart'),{type:'doughnut',data:{
+    labels:['Coach (94.8%) — 3170 tickets','Business (3.8%) — 128 tickets','First (1.3%) — 45 tickets'],
+    datasets:[{data:[3170,128,45],backgroundColor:['#1e5fcc','#dc2626','#7c3aed'],borderWidth:3,borderColor:'#fff'}]},
+    options:{cutout:'65%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}}}});
+  new Chart($('hotelPurposeChart'),{type:'doughnut',data:{
+    labels:['Internal Meeting (34.4%) — $391,011','Maintenance And Installation (27.6%) — $314,516','Customer Visit (19.9%) — $226,816','Conference (8.8%) — $100,115','Training (5.8%) — $66,286','Billable To Client (3.5%) — $39,297'],
+    datasets:[{data:[391011,314516,226816,100115,66286,39297],backgroundColor:['#1e5fcc','#f59e0b','#059669','#7c3aed','#dc2626','#0891b2'],borderWidth:3,borderColor:'#fff'}]},
+    options:{cutout:'65%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}},
+      tooltip:{callbacks:{label:ctx=>`$${ctx.parsed.toLocaleString()}`}}}}});
+  new Chart($('savingsChart'),{type:'bar',data:{
+    labels:["Hilton Richardson Dallas","United Airlines","American","Delta Airlines","Renaissance Richardson Hotel","Element Dallas Richardson","Southwest Air","Itc Kohenur Hyderabad","Home2 Suites By Hilton Tuscaloo","Lufthansa"],
+    datasets:[{label:'Savings ($)',data:[14477.41,13766.39,11871.25,6780.17,6136.63,3945.9,2703.57,2373.4,1398.52,862.9],backgroundColor:['#059669','#1e5fcc','#1e5fcc','#1e5fcc','#059669','#059669','#1e5fcc','#059669','#059669','#1e5fcc'],borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`$${ctx.parsed.x.toLocaleString()}`}}},
+      scales:{x:{ticks:{callback:v=>'$'+v.toLocaleString()},grid:{color:'#f1f5f9'}},y:{grid:{display:false}}}}});
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  buildStatic(); setTier('ytd');
+  const srch=$('ldrSearch');
+  if(srch)srch.addEventListener('input',function(){
+    renderAllTable(allLdrData.filter(r=>r.l.toLowerCase().includes(this.value.toLowerCase())));
+  });
+  const secs=document.querySelectorAll('.sec');
+  const nav=document.querySelectorAll('.nav-tabs a');
+  window.addEventListener('scroll',()=>{
+    let cur='';secs.forEach(s=>{if(window.scrollY>=s.offsetTop-130)cur=s.id;});
+    nav.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+cur));
+  });
+});
+
+</script>
+</body>
+</html>
